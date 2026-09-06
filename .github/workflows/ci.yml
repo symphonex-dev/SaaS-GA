@@ -1,0 +1,102 @@
+name: CI
+
+# Séquence identique à celle documentée dans `README.md` § « Séquence CI » et
+# dans `CLAUDE.md` §8. Toute divergence entre les deux est un défaut : ce
+# fichier est ce qui s'exécute réellement.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qualite:
+    name: Typecheck, lint, format, tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    env:
+      # Aucune valeur réelle : la suite de tests utilise un double Prisma en
+      # mémoire (`apps/api/tests/helpers/prisma-mock.ts`) et ne touche aucune
+      # base. `prisma generate` a malgré tout besoin d'une URL syntaxiquement
+      # valide pour lire le schéma.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      DIRECT_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Aligné sur `engines.node` de la racine.
+          node-version: '20.11.0'
+          cache: npm
+
+      # `npm ci` et non `npm install` : l'arbre installé doit être exactement
+      # celui du lockfile. Les versions natives de `apps/mobile` sont épinglées
+      # sur celles d'Expo Go, et une résolution différente casse l'application
+      # au démarrage (CLAUDE.md §10.10).
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Générer le client Prisma
+        run: npx prisma generate --schema=apps/api/prisma/schema.prisma
+
+      - name: Vérifier que le schéma Prisma est valide
+        run: npx prisma validate --schema=apps/api/prisma/schema.prisma
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+  expo:
+    name: Cohérence Expo (mobile)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.0'
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      # Ces deux contrôles gardent l'application démarrable dans Expo Go : une
+      # dérive de version native y produit un écran « Something went wrong »
+      # (CLAUDE.md §10.10).
+      - name: expo-doctor
+        working-directory: apps/mobile
+        run: npx expo-doctor
+
+      - name: Versions alignées sur le SDK Expo
+        working-directory: apps/mobile
+        run: npx expo install --check
+
+      # Le bundle doit se construire : c'est la seule vérification automatisable
+      # de l'application mobile hors appareil.
+      - name: Bundle Android
+        working-directory: apps/mobile
+        run: npx expo export --platform android --clear --output-dir /tmp/expo-export

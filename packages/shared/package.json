@@ -1,0 +1,32 @@
+{
+  "name": "@subscription-manager/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Types, schémas Zod et constantes partagés entre apps/api et apps/mobile",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./constants": "./constants/index.ts",
+    "./types": "./types/index.ts",
+    "./validation": "./validation/index.ts",
+    "./finance": "./finance/index.ts"
+  },
+  "files": [
+    "constants",
+    "finance",
+    "types",
+    "validation",
+    "index.ts"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

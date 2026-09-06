@@ -1,0 +1,15 @@
+node_modules
+.next
+dist
+build
+coverage
+package-lock.json
+
+# Migrations générées par Prisma : ne jamais reformater (checksum de migration).
+apps/api/prisma/migrations
+
+# Documentation de pilotage et specs : documents rédigés à la main, source de
+# vérité du projet. Les reformater créerait du bruit sans valeur.
+*.md
+specs/
+next-env.d.ts

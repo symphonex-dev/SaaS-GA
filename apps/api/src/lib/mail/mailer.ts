@@ -1,0 +1,210 @@
+import type { Locale } from '@subscription-manager/shared';
+
+import { getServerEnv } from '@/lib/env/server';
+import { passwordResetTemplate, resolveLocale } from '@/lib/mail/templates';
+
+/**
+ * Envoi d'e-mail transactionnel (réinitialisation de mot de passe uniquement
+ * en V1 — `specs/auth-comptes-rgpd.md` §5).
+ *
+ * ## Ce qui n'est jamais journalisé
+ *
+ * L'adresse du destinataire, le lien de réinitialisation (il **contient le
+ * token brut**), la clé d'API du fournisseur, le corps de la requête et le
+ * corps de la réponse. Un journal ne porte que le code HTTP et le nom du
+ * transport : c'est suffisant pour diagnostiquer une panne, et insuffisant
+ * pour prendre le contrôle d'un compte (CLAUDE.md §6).
+ */
+export interface PasswordResetEmail {
+  to: string;
+  /** Lien complet contenant le token brut — jamais persisté, jamais journalisé. */
+  resetUrl: string;
+  /** Langue du compte : les traductions sont statiques (CLAUDE.md §5.6). */
+  locale: Locale;
+}
+
+export interface Mailer {
+  sendPasswordReset(email: PasswordResetEmail): Promise<void>;
+}
+
+/** Échec d'envoi. Le message ne contient **aucune** donnée personnelle. */
+export class MailDeliveryError extends Error {
+  readonly status: number | null;
+
+  constructor(message: string, status: number | null = null) {
+    super(message);
+    this.name = 'MailDeliveryError';
+    this.status = status;
+  }
+}
+
+/** Configuration incohérente : détectée au démarrage, pas au premier envoi. */
+export class MailConfigurationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'MailConfigurationError';
+  }
+}
+
+/**
+ * Transport par défaut : n'envoie rien et ne journalise rien.
+ *
+ * Utile en développement et en test. Refusé en production par
+ * `mailerConfigurationIssues()` : un mot de passe oublié y resterait sans
+ * réponse, en silence.
+ */
+const noopMailer: Mailer = {
+  sendPasswordReset: () => Promise.resolve(),
+};
+
+/**
+ * Transport de développement local : écrit le lien dans la sortie standard.
+ *
+ * Le lien contient le token brut : ce transport est donc **interdit en
+ * production**, où la sortie standard est collectée et conservée.
+ */
+const consoleMailer: Mailer = {
+  sendPasswordReset: ({ resetUrl }) => {
+    if (getServerEnv().NODE_ENV === 'production') {
+      // Rejet plutôt que jet synchrone : l'interface est asynchrone, et un
+      // appelant qui n'attend que le rejet passerait à côté de l'autre forme.
+      return Promise.reject(
+        new MailConfigurationError('EMAIL_PROVIDER=console est interdit en production.'),
+      );
+    }
+
+    console.info(`[dev] Lien de réinitialisation : ${resetUrl}`);
+
+    return Promise.resolve();
+  },
+};
+
+/** Injectable pour les tests : aucun test n'atteint un fournisseur réel. */
+export type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
+
+/**
+ * Transport réel — API HTTP du fournisseur (Resend).
+ *
+ * Il **envoie réellement** le message : c'est la seule implémentation autorisée
+ * en production. Un échec lève `MailDeliveryError` ; l'appelant décide quoi en
+ * faire (voir `auth.service.ts` : la réponse publique reste générique, sans
+ * quoi le code de retour révélerait l'existence du compte).
+ */
+export function createResendMailer(fetchImpl: FetchLike = fetch): Mailer {
+  return {
+    sendPasswordReset: async ({ to, resetUrl, locale }) => {
+      const env = getServerEnv();
+      const issues = mailerConfigurationIssues(env);
+
+      if (issues.length > 0) {
+        throw new MailConfigurationError(`Configuration e-mail incomplète : ${issues.join(', ')}`);
+      }
+
+      const template = passwordResetTemplate(
+        resolveLocale(locale),
+        resetUrl,
+        env.AUTH_PASSWORD_RESET_TTL_MINUTES,
+      );
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => {
+        controller.abort();
+      }, env.EMAIL_REQUEST_TIMEOUT_MS);
+
+      let response: Response;
+
+      try {
+        response = await fetchImpl(`${env.EMAIL_API_BASE_URL.replace(/\/+$/, '')}/emails`, {
+          method: 'POST',
+          headers: {
+            authorization: `Bearer ${env.EMAIL_PROVIDER_API_KEY}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: env.EMAIL_FROM,
+            to: [to],
+            subject: template.subject,
+            text: template.text,
+            html: template.html,
+            ...(env.EMAIL_REPLY_TO.length > 0 ? { reply_to: env.EMAIL_REPLY_TO } : {}),
+          }),
+          signal: controller.signal,
+        });
+      } catch (error) {
+        // Ni l'URL complète, ni le corps, ni le destinataire : uniquement la
+        // nature de la panne.
+        throw new MailDeliveryError(
+          `Envoi impossible (${error instanceof Error ? error.name : 'erreur inconnue'}).`,
+        );
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      if (!response.ok) {
+        // Le corps de la réponse peut contenir l'adresse : il n'est pas lu.
+        throw new MailDeliveryError('Le fournisseur a refusé l’envoi.', response.status);
+      }
+    },
+  };
+}
+
+/**
+ * Problèmes de configuration bloquants, exprimés en **noms de variables**.
+ *
+ * Aucune valeur n'est renvoyée : ce résultat est destiné à être journalisé au
+ * démarrage et à alimenter le contrôle de production.
+ */
+export function mailerConfigurationIssues(
+  env: Pick<
+    ReturnType<typeof getServerEnv>,
+    'NODE_ENV' | 'EMAIL_PROVIDER' | 'EMAIL_PROVIDER_API_KEY' | 'EMAIL_FROM'
+  >,
+): string[] {
+  const issues: string[] = [];
+
+  if (env.EMAIL_PROVIDER === 'resend') {
+    if (env.EMAIL_PROVIDER_API_KEY.trim().length === 0) {
+      issues.push('EMAIL_PROVIDER_API_KEY');
+    }
+
+    if (env.EMAIL_FROM.trim().length === 0) {
+      issues.push('EMAIL_FROM');
+    }
+  }
+
+  if (env.NODE_ENV === 'production' && env.EMAIL_PROVIDER !== 'resend') {
+    issues.push('EMAIL_PROVIDER');
+  }
+
+  return issues;
+}
+
+let overrideMailer: Mailer | null = null;
+
+/** Substitue le transport. Réservé aux tests. */
+export function setMailerForTests(mailer: Mailer | null): void {
+  overrideMailer = mailer;
+}
+
+export function getMailer(): Mailer {
+  if (overrideMailer !== null) {
+    return overrideMailer;
+  }
+
+  switch (getServerEnv().EMAIL_PROVIDER) {
+    case 'console':
+      return consoleMailer;
+    case 'resend':
+      return createResendMailer();
+    default:
+      return noopMailer;
+  }
+}
+
+/** Construit le lien de réinitialisation envoyé à l'utilisateur. */
+export function buildPasswordResetUrl(token: string): string {
+  const base = getServerEnv().PASSWORD_RESET_URL_BASE;
+  const separator = base.includes('?') ? '&' : '?';
+
+  return `${base}${separator}token=${encodeURIComponent(token)}`;
+}

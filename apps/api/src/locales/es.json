@@ -1,0 +1,115 @@
+{
+  "common": {
+    "appName": "Gestor de suscripciones",
+    "backToHome": "Inicio",
+    "lastUpdated": "Última actualización: {date}",
+    "footer": "{company} — este sitio aloja los documentos legales de la aplicación móvil.",
+    "nav": {
+      "privacy": "Privacidad",
+      "terms": "Términos",
+      "cookies": "Cookies",
+      "help": "Ayuda",
+      "contact": "Contacto"
+    }
+  },
+  "privacy": {
+    "title": "Política de privacidad",
+    "intro": "Esta política explica qué hace la aplicación con tus datos. Está escrita para leerse, no para pasarla por alto.",
+    "controllerTitle": "Quién es responsable",
+    "controllerBody": "{company} es el responsable del tratamiento. Puedes escribirnos a {email} para cualquier duda sobre tus datos.",
+    "dataTitle": "Qué recogemos",
+    "dataIntro": "Solo lo que la aplicación necesita para funcionar:",
+    "dataItems": {
+      "account": "Tu dirección de correo y tu contraseña (guardada solo como huella Argon2id: nunca en claro, nunca recuperable).",
+      "preferences": "Tu idioma, tu país y tu moneda.",
+      "statements": "Las transacciones extraídas de los extractos bancarios que importas: fecha, importe, moneda y nombre del comercio.",
+      "subscription": "Tu plan (Free o Plus) y, si te suscribes, los identificadores de suscripción que devuelven Google Play o la App Store."
+    },
+    "noBankTitle": "Qué no recogemos nunca",
+    "noBankIntro": "Lo siguiente nunca llega a nuestros servidores:",
+    "noBankItems": {
+      "credentials": "Tus credenciales de banca en línea. La aplicación no tiene ninguna conexión con tu banco: eres tú quien importa un archivo.",
+      "card": "Los datos de tu tarjeta. El pago lo gestiona íntegramente tu cuenta de Google o de Apple.",
+      "trackers": "Ningún dato publicitario ni de analítica de comportamiento. La aplicación no incorpora ningún SDK publicitario ni de analítica de terceros."
+    },
+    "fileTitle": "Archivos importados",
+    "fileBody": "El extracto que envías se analiza y se elimina de inmediato, tanto si el análisis funciona como si falla. Solo se conservan las transacciones extraídas, en tu cuenta.",
+    "aiTitle": "Asistente de IA",
+    "aiBody": "El asistente, opcional, solo recibe cifras ya calculadas por la aplicación (totales del mes, subidas detectadas, nombres de comercios). Nunca recibe tu contraseña, tu token de sesión ni los datos de otro usuario, y nunca puede modificar ni eliminar nada.",
+    "rightsTitle": "Tus derechos",
+    "rightsIntro": "Conforme al RGPD puedes, desde la propia aplicación:",
+    "rightsItems": {
+      "access": "Exportar todos tus datos en formato JSON, desde Ajustes.",
+      "erase": "Eliminar tu cuenta. El borrado es inmediato e irreversible: elimina tus transacciones, detecciones, objetivos de ahorro y sesiones.",
+      "rectify": "Corregir una transacción importada, o eliminarla.",
+      "portability": "Reutilizar la exportación JSON en otro lugar: es un formato abierto y legible."
+    },
+    "retentionTitle": "Cuánto tiempo los conservamos",
+    "retentionBody": "Tus datos viven mientras viva tu cuenta. Eliminar la cuenta elimina los datos, sin conservación diferida ni copia de archivo.",
+    "complaintTitle": "Reclamaciones",
+    "complaintBody": "Si consideras que no se respetan tus derechos, puedes reclamar ante la autoridad de protección de datos de tu país (en España, la AEPD)."
+  },
+  "terms": {
+    "title": "Condiciones de uso",
+    "intro": "Al usar la aplicación aceptas estas condiciones.",
+    "serviceTitle": "Qué hace la aplicación",
+    "serviceBody": "La aplicación lee los extractos bancarios que importas, detecta los pagos recurrentes y calcula cuánto te cuestan. Es una herramienta informativa.",
+    "notAdviceTitle": "Qué no es",
+    "notAdviceBody": "La aplicación no ofrece asesoramiento de inversión, ni de crédito, ni evaluación de solvencia, y no garantiza ningún resultado financiero. Las recurrencias detectadas y las fechas estimadas se calculan a partir de tu propio historial: son previsiones, no certezas. Comprueba siempre un importe en tu extracto antes de actuar.",
+    "accountTitle": "Tu cuenta",
+    "accountBody": "Es obligatorio tener una cuenta. Eres responsable de mantener tu contraseña en secreto. Nunca podemos leerla y, por tanto, nunca podemos recuperarla: solo restablecerla.",
+    "plansTitle": "Planes Free y Plus",
+    "plansBody": "El plan Free se puede usar sin límite de tiempo. El plan Plus es una suscripción facturada por Google Play o la App Store, al precio que muestre la tienda para tu país. Nunca gestionamos tus medios de pago.",
+    "cancelTitle": "Cancelación",
+    "cancelBody": "La cancelación se hace desde los ajustes de suscripción de tu cuenta de Google Play o Apple. Al cancelar conservas el acceso de pago hasta el final del periodo ya abonado: el acceso nunca se corta antes. Tu cuenta se puede eliminar en cualquier momento, incluso antes de esa fecha.",
+    "availabilityTitle": "Disponibilidad",
+    "availabilityBody": "El servicio se presta tal cual. Pueden producirse interrupciones, por mantenimiento u otros motivos.",
+    "changesTitle": "Cambios",
+    "changesBody": "Estas condiciones pueden cambiar. La fecha que figura abajo indica la versión vigente."
+  },
+  "cookies": {
+    "title": "Cookies",
+    "shortTitle": "En resumen",
+    "shortBody": "Este sitio no instala ninguna cookie y la aplicación móvil no contiene ningún rastreador.",
+    "siteTitle": "Este sitio",
+    "siteBody": "Estas páginas son texto estático. No instalan ninguna cookie, ninguna entrada de almacenamiento local ni ningún identificador de seguimiento. No hay nada que aceptar ni rechazar: por eso no ves ningún aviso de consentimiento.",
+    "appTitle": "La aplicación móvil",
+    "appIntro": "La aplicación guarda dos cosas en tu dispositivo, y nada más:",
+    "appItems": {
+      "session": "Tu token de sesión, en el almacenamiento seguro del dispositivo (Keychain / Keystore), para no tener que iniciar sesión cada vez.",
+      "preferences": "Tus preferencias de interfaz."
+    },
+    "appOutro": "No contiene ningún SDK publicitario, ningún SDK de analítica de comportamiento ni ningún identificador publicitario."
+  },
+  "help": {
+    "title": "Ayuda",
+    "importTitle": "Importar un extracto",
+    "importBody": "Descarga un extracto CSV o PDF de tu banco y después impórtalo desde la aplicación. El archivo se analiza en nuestros servidores y se elimina justo después. No se escribe nada en tu cuenta hasta que confirmas la vista previa.",
+    "formatsTitle": "Formatos admitidos",
+    "formatsBody": "Los extractos CSV están disponibles ya en el plan Free. Los extractos PDF requieren el plan Plus, más allá de una prueba limitada. Un PDF escaneado sin capa de texto no se puede leer.",
+    "detectionTitle": "Recurrencias detectadas",
+    "detectionBody": "La detección es determinista: un mismo extracto da siempre el mismo resultado y no interviene ninguna IA. Si una recurrencia es errónea, puedes corregir su frecuencia o ignorarla: tu corrección prevalece sobre el motor.",
+    "currencyTitle": "Varias monedas",
+    "currencyBody": "Los totales se calculan solo en la moneda de tu cuenta. Las transacciones en otra moneda quedan fuera de los totales y se indican aparte: nunca convertimos un importe sin un tipo de cambio verificado.",
+    "billingTitle": "Suscripción y facturación",
+    "billingBody": "El plan Plus lo factura Google Play o la App Store. La cancelación se hace desde los ajustes de tu cuenta de la tienda; conservas el acceso de pago hasta el final del periodo ya abonado.",
+    "deleteTitle": "Eliminar tu cuenta",
+    "deleteBody": "El borrado es inmediato e irreversible. Solo está bloqueado mientras una suscripción de pago siga activa y sin cancelar: cancela primero y el borrado se desbloquea al instante.",
+    "contactBody": "¿Sigues atascado? Escribe a {email}."
+  },
+  "contact": {
+    "title": "Contacto",
+    "intro": "Una sola dirección, para todo: {email}.",
+    "topicsTitle": "Qué conviene indicar",
+    "topicsIntro": "Para recibir una respuesta útil cuanto antes, dinos:",
+    "topicsItems": {
+      "account": "La dirección de correo de tu cuenta (no envíes nunca tu contraseña: nunca te la pediremos).",
+      "device": "Tu dispositivo y su versión del sistema, si se trata de un fallo.",
+      "context": "Qué estabas haciendo y qué esperabas que ocurriera."
+    },
+    "privacyTitle": "Solicitudes sobre tus datos",
+    "privacyBody": "Para una solicitud de acceso, rectificación o supresión puedes actuar directamente desde la aplicación: Ajustes ofrece la exportación completa y el borrado de la cuenta. Escríbenos si algo te lo impide.",
+    "securityTitle": "Informar de una vulnerabilidad",
+    "securityBody": "Si crees haber encontrado un fallo de seguridad, escribe a la misma dirección con el asunto «Seguridad». Te agradecemos que no lo publiques antes de que podamos corregirlo."
+  }
+}

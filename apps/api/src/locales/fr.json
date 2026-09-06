@@ -1,0 +1,115 @@
+{
+  "common": {
+    "appName": "Gestionnaire d’abonnements",
+    "backToHome": "Accueil",
+    "lastUpdated": "Dernière mise à jour : {date}",
+    "footer": "{company} — ce site héberge les documents légaux de l’application mobile.",
+    "nav": {
+      "privacy": "Confidentialité",
+      "terms": "CGU",
+      "cookies": "Cookies",
+      "help": "Aide",
+      "contact": "Contact"
+    }
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "intro": "Cette politique explique ce que l’application fait de vos données. Elle est écrite pour être lue, pas pour être survolée.",
+    "controllerTitle": "Qui est responsable",
+    "controllerBody": "{company} est responsable du traitement. Vous pouvez nous écrire à {email} pour toute question sur vos données.",
+    "dataTitle": "Ce que nous collectons",
+    "dataIntro": "Uniquement ce dont l’application a besoin pour fonctionner :",
+    "dataItems": {
+      "account": "Votre adresse e-mail et votre mot de passe (stocké uniquement sous forme d’empreinte Argon2id — jamais en clair, jamais récupérable).",
+      "preferences": "Votre langue, votre pays et votre devise.",
+      "statements": "Les transactions extraites des relevés bancaires que vous importez : date, montant, devise et libellé du commerçant.",
+      "subscription": "Votre offre (Free ou Plus) et, si vous vous abonnez, les identifiants d’abonnement renvoyés par Google Play ou l’App Store."
+    },
+    "noBankTitle": "Ce que nous ne collectons jamais",
+    "noBankIntro": "Les éléments suivants n’atteignent jamais nos serveurs :",
+    "noBankItems": {
+      "credentials": "Vos identifiants de banque en ligne. L’application n’a aucune connexion à votre banque : vous importez vous-même un fichier.",
+      "card": "Vos données de carte bancaire. Le paiement est entièrement pris en charge par votre compte Google ou Apple.",
+      "trackers": "Aucune donnée publicitaire ni d’analyse comportementale. L’application n’intègre aucun SDK publicitaire ni aucun SDK d’analytics tiers."
+    },
+    "fileTitle": "Fichiers importés",
+    "fileBody": "Un relevé que vous envoyez est analysé puis supprimé immédiatement, que l’analyse réussisse ou échoue. Seules les transactions extraites sont conservées, dans votre compte.",
+    "aiTitle": "Assistant IA",
+    "aiBody": "L’assistant, facultatif, ne reçoit que des chiffres déjà calculés par l’application (totaux du mois, hausses détectées, noms de commerçants). Il ne reçoit jamais votre mot de passe, votre jeton de session, ni les données d’un autre utilisateur — et il ne peut jamais modifier ni supprimer quoi que ce soit.",
+    "rightsTitle": "Vos droits",
+    "rightsIntro": "Au titre du RGPD, vous pouvez, directement depuis l’application :",
+    "rightsItems": {
+      "access": "Exporter l’intégralité de vos données au format JSON, depuis les Paramètres.",
+      "erase": "Supprimer votre compte. La suppression est immédiate et irréversible : elle efface vos transactions, vos détections, vos objectifs d’épargne et vos sessions.",
+      "rectify": "Corriger une transaction importée, ou la supprimer.",
+      "portability": "Réutiliser l’export JSON ailleurs : c’est un format ouvert et lisible."
+    },
+    "retentionTitle": "Durée de conservation",
+    "retentionBody": "Vos données vivent aussi longtemps que votre compte. Supprimer le compte supprime les données — sans conservation différée, sans copie d’archive.",
+    "complaintTitle": "Réclamations",
+    "complaintBody": "Si vous estimez que vos droits ne sont pas respectés, vous pouvez saisir l’autorité de protection des données de votre pays (en France, la CNIL)."
+  },
+  "terms": {
+    "title": "Conditions générales d’utilisation",
+    "intro": "En utilisant l’application, vous acceptez ces conditions.",
+    "serviceTitle": "Ce que fait l’application",
+    "serviceBody": "L’application lit les relevés bancaires que vous importez, détecte les paiements récurrents et calcule ce qu’ils vous coûtent. C’est un outil d’information.",
+    "notAdviceTitle": "Ce qu’elle n’est pas",
+    "notAdviceBody": "L’application ne fournit aucun conseil en investissement, aucun conseil en crédit, aucune évaluation de solvabilité, et ne garantit aucun résultat financier. Les récurrences détectées et les dates estimées sont calculées à partir de votre propre historique : ce sont des prévisions, pas des certitudes. Vérifiez toujours un montant sur votre relevé avant d’agir.",
+    "accountTitle": "Votre compte",
+    "accountBody": "Un compte est obligatoire. Vous êtes responsable de la confidentialité de votre mot de passe. Nous ne pouvons jamais le lire, et donc jamais le récupérer — seulement le réinitialiser.",
+    "plansTitle": "Offres Free et Plus",
+    "plansBody": "L’offre Free est utilisable sans limite de durée. L’offre Plus est un abonnement facturé par Google Play ou l’App Store, au prix affiché par le store pour votre pays. Nous ne manipulons jamais vos moyens de paiement.",
+    "cancelTitle": "Résiliation",
+    "cancelBody": "La résiliation se fait depuis les réglages d’abonnement de votre compte Google Play ou Apple. À la résiliation, vous conservez l’accès payant jusqu’à la fin de la période déjà réglée — l’accès n’est jamais coupé par anticipation. Votre compte reste supprimable à tout moment, y compris avant cette échéance.",
+    "availabilityTitle": "Disponibilité",
+    "availabilityBody": "Le service est fourni en l’état. Des interruptions peuvent survenir, pour maintenance ou autre.",
+    "changesTitle": "Évolutions",
+    "changesBody": "Ces conditions peuvent évoluer. La date ci-dessous indique la version en vigueur."
+  },
+  "cookies": {
+    "title": "Cookies",
+    "shortTitle": "En résumé",
+    "shortBody": "Ce site ne dépose aucun cookie, et l’application mobile ne contient aucun tracker.",
+    "siteTitle": "Ce site",
+    "siteBody": "Ces pages sont du texte statique. Elles ne déposent aucun cookie, aucune entrée de stockage local et aucun identifiant de suivi. Il n’y a rien à accepter ni à refuser — c’est pourquoi vous ne voyez aucune bannière de consentement.",
+    "appTitle": "L’application mobile",
+    "appIntro": "L’application stocke deux choses sur votre appareil, et rien d’autre :",
+    "appItems": {
+      "session": "Votre jeton de session, dans le stockage sécurisé de l’appareil (Keychain / Keystore), pour ne pas avoir à vous reconnecter à chaque lancement.",
+      "preferences": "Vos préférences d’interface."
+    },
+    "appOutro": "Elle ne contient aucun SDK publicitaire, aucun SDK d’analyse comportementale et aucun identifiant publicitaire."
+  },
+  "help": {
+    "title": "Aide",
+    "importTitle": "Importer un relevé",
+    "importBody": "Téléchargez un relevé CSV ou PDF depuis votre banque, puis importez-le depuis l’application. Le fichier est analysé sur nos serveurs puis supprimé immédiatement. Rien n’est écrit dans votre compte tant que vous n’avez pas confirmé l’aperçu.",
+    "formatsTitle": "Formats acceptés",
+    "formatsBody": "Les relevés CSV sont pris en charge dès l’offre Free. Les relevés PDF nécessitent l’offre Plus, au-delà d’un essai limité. Un PDF scanné sans couche texte ne peut pas être lu.",
+    "detectionTitle": "Récurrences détectées",
+    "detectionBody": "La détection est déterministe : un même relevé donne toujours le même résultat, et aucune IA n’intervient. Si une récurrence est fausse, vous pouvez corriger sa fréquence ou l’ignorer — votre correction prime sur le moteur.",
+    "currencyTitle": "Plusieurs devises",
+    "currencyBody": "Les totaux sont calculés dans la devise de votre compte uniquement. Les transactions dans une autre devise sont écartées des totaux et signalées à part : nous ne convertissons jamais un montant sans taux de change vérifié.",
+    "billingTitle": "Abonnement et facturation",
+    "billingBody": "L’offre Plus est facturée par Google Play ou l’App Store. La résiliation se fait depuis les réglages de votre compte store ; vous conservez l’accès payant jusqu’à la fin de la période déjà réglée.",
+    "deleteTitle": "Supprimer son compte",
+    "deleteBody": "La suppression est immédiate et irréversible. Elle n’est bloquée que tant qu’un abonnement payant est encore actif et non résilié : résiliez d’abord, la suppression est débloquée aussitôt.",
+    "contactBody": "Toujours bloqué ? Écrivez à {email}."
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "Une seule adresse, pour tout : {email}.",
+    "topicsTitle": "Ce qu’il faut préciser",
+    "topicsIntro": "Pour obtenir une réponse utile rapidement, indiquez-nous :",
+    "topicsItems": {
+      "account": "L’adresse e-mail de votre compte (n’envoyez jamais votre mot de passe — nous ne le demanderons jamais).",
+      "device": "Votre appareil et sa version d’OS, s’il s’agit d’un dysfonctionnement.",
+      "context": "Ce que vous étiez en train de faire et ce que vous attendiez à la place."
+    },
+    "privacyTitle": "Demandes relatives aux données",
+    "privacyBody": "Pour une demande d’accès, de rectification ou d’effacement, vous pouvez agir directement depuis l’application : les Paramètres proposent l’export complet et la suppression du compte. Écrivez-nous si quelque chose vous bloque.",
+    "securityTitle": "Signaler une vulnérabilité",
+    "securityBody": "Si vous pensez avoir trouvé une faille de sécurité, écrivez à la même adresse avec l’objet « Sécurité ». Merci de ne pas la publier avant que nous ayons pu la corriger."
+  }
+}

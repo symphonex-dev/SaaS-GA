@@ -1,0 +1,35 @@
+# Dépendances
+node_modules/
+.npm/
+
+# Build
+.next/
+out/
+dist/
+build/
+.expo/
+*.tsbuildinfo
+
+# Prisma
+apps/api/prisma/*.db
+apps/api/prisma/*.db-journal
+
+# Environnement — aucun secret réel n'est committé (voir .env.example)
+.env
+.env.*
+!.env.example
+
+# Logs / caches / OS
+*.log
+npm-debug.log*
+coverage/
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Genere par `next build`, jamais edite a la main.
+next-env.d.ts

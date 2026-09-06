@@ -1,0 +1,566 @@
+{
+  "common": {
+    "appName": "Subscription Manager",
+    "continue": "Continue",
+    "back": "Back",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "empty": "Nothing to show yet",
+    "of": "of",
+    "estimate": "Estimate"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Import your bank statement. Find recurring payments. Discover ways to save.",
+      "subtitle": "Subscription Manager reads the statement you already have. It is not a bank and does not give financial advice.",
+      "getStarted": "Get started",
+      "logIn": "Log in",
+      "languageLabel": "App language",
+      "step": "Step {{current}} of {{total}}"
+    },
+    "preferences": {
+      "title": "Language, country and currency",
+      "subtitle": "These three settings are independent. Changing one never changes the others.",
+      "language": "Language",
+      "country": "Country",
+      "currency": "Currency",
+      "countryHint": "Used to read dates and amounts in your statements.",
+      "currencyHint": "Used for your totals. Expenses in another currency are shown separately."
+    },
+    "privacy": {
+      "title": "Your data stays yours",
+      "noTrackers": "No advertising SDK, no third-party behavioural analytics. Ever.",
+      "fileDeleted": "Your statement file is deleted from our servers immediately after processing.",
+      "exportable": "You can export or delete your account and all its data at any time.",
+      "accountRequired": "An account is required to use the app. There is no guest mode.",
+      "accept": "I understand, create my account",
+      "readPolicy": "Read the privacy policy"
+    }
+  },
+  "auth": {
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Last step before your first import.",
+      "email": "Email address",
+      "password": "Password",
+      "passwordHint": "At least 12 characters.",
+      "submit": "Create account",
+      "haveAccount": "I already have an account"
+    },
+    "login": {
+      "title": "Log in",
+      "email": "Email address",
+      "password": "Password",
+      "submit": "Log in",
+      "forgot": "Forgot your password?",
+      "noAccount": "Create an account"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "subtitle": "We will email you a reset link if an account exists.",
+      "email": "Email address",
+      "submit": "Send reset link",
+      "sent": "If a matching account exists, a reset email has been sent.",
+      "backToLogin": "Back to log in"
+    },
+    "logout": "Log out",
+    "resetPassword": {
+      "title": "Choose a new password",
+      "subtitle": "The link is valid once, and for a short time.",
+      "password": "New password",
+      "passwordHint": "At least 12 characters.",
+      "confirmPassword": "Confirm the new password",
+      "mismatch": "The two passwords do not match.",
+      "submit": "Update my password",
+      "done": "Password updated. All your other sessions have been signed out.",
+      "backToLogin": "Go to log in",
+      "missingToken": "This link is incomplete. Request a new reset email."
+    }
+  },
+  "import": {
+    "title": "Import a statement",
+    "chooseSource": {
+      "title": "Which file do you have?",
+      "csvTitle": "CSV file",
+      "csvDescription": "Recommended. Exported from your bank in a few clicks, and read reliably.",
+      "pdfTitle": "PDF statement",
+      "pdfDescription": "Works with PDF statements that have a readable structure. Always check the results before confirming.",
+      "pdfPlusRequired": "PDF import is part of Plus beyond the free trial."
+    },
+    "upload": {
+      "title": "Select your file",
+      "pick": "Choose a file",
+      "selected": "Selected: {{name}}",
+      "hint": "Maximum {{size}} MB. The file is deleted right after processing.",
+      "submit": "Analyse the file",
+      "pickerFailed": "The file picker could not be opened. Check the app permissions and try again.",
+      "defaultFileName": "statement"
+    },
+    "mapping": {
+      "title": "Match your columns",
+      "subtitle": "We could not recognise the columns automatically. Tell us where each value is.",
+      "date": "Date column",
+      "description": "Description column",
+      "amount": "Amount column",
+      "submit": "Apply and analyse"
+    },
+    "review": {
+      "title": "Check before importing",
+      "detected": "{{count}} transactions detected",
+      "currency": "Currency",
+      "dateOrder": "Dates read as {{order}}",
+      "dateOrderDMY": "day/month/year",
+      "dateOrderMDY": "month/day/year",
+      "debits": "Debits",
+      "credits": "Credits",
+      "sections": {
+        "valid": "Ready to import",
+        "duplicate": "Possible duplicates",
+        "refund": "Refunds (excluded)",
+        "skipped": "Credits (not expenses)",
+        "invalid": "Lines we could not read"
+      },
+      "rowNumber": "Line {{number}}",
+      "include": "Include",
+      "exclude": "Exclude",
+      "cancelImport": "Cancel import",
+      "submit": "Import {{count}} transactions",
+      "duplicateHigh": "Already recorded — cannot be imported.",
+      "duplicateMedium": "Possibly already recorded — your call.",
+      "pdfNotice": "Works with PDF statements that have a readable structure. Always check the results before confirming."
+    },
+    "confirm": {
+      "title": "Import complete",
+      "imported": "{{count}} transactions imported",
+      "rejected": "{{count}} lines not imported",
+      "duplicates": "{{count}} duplicates skipped",
+      "rollback": "Undo this import",
+      "rollbackDone": "Import undone.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "states": {
+      "idle": "Ready",
+      "uploading": "Uploading…",
+      "parsing": "Reading your statement…",
+      "preview": "Check the results",
+      "validationError": "Some lines need your attention",
+      "readyToImport": "Ready to import",
+      "importing": "Importing…",
+      "completed": "Imported",
+      "rollbackAvailable": "You can still undo this import"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "kpis": {
+      "monthlyExpenses": "Expenses this month",
+      "activeSubscriptions": "Subscriptions detected",
+      "annualRecurringCost": "Recurring cost per year",
+      "expensesToReview": "Items to review"
+    },
+    "sections": {
+      "evolution": "Spending over the last 6 months",
+      "upcoming": "Next estimated payments",
+      "priceAlerts": "Price increases",
+      "savings": "Savings",
+      "aiSummary": "Monthly summary"
+    },
+    "monthOverMonth": {
+      "up": "↑ {{value}} vs last month",
+      "down": "↓ {{value}} vs last month",
+      "unchanged": "Unchanged vs last month",
+      "noComparison": "No comparison available for last month"
+    },
+    "unconverted": {
+      "title": "Not included in these totals",
+      "description": "{{count}} expenses in {{currency}}. We never convert currencies without a verified exchange rate."
+    },
+    "priceAlert": "{{merchant}}: {{previous}} → {{current}} ({{percentage}})",
+    "priceAlertsPlus": "Price increase alerts are part of Plus.",
+    "empty": {
+      "title": "No data yet",
+      "description": "Import a bank statement to see your recurring payments.",
+      "action": "Import a statement"
+    }
+  },
+  "transactions": {
+    "title": "Transactions",
+    "empty": "No transactions yet.",
+    "addManual": "Add a missing transaction",
+    "correct": "Correct this transaction",
+    "source": {
+      "IMPORT": "Imported",
+      "MANUAL": "Added manually"
+    },
+    "manual": {
+      "newTitle": "Add a missing transaction",
+      "editTitle": "Correct this transaction",
+      "editHint": "Opens the correction form for this transaction.",
+      "subtitle": "For cash spending or anything your statement missed.",
+      "secondaryNotice": "Importing a statement stays the main route. Manual entry is only for corrections and what the statement missed.",
+      "merchant": "Merchant",
+      "merchantHint": "The name you want to see in your list.",
+      "merchantError": "Enter a merchant name.",
+      "merchantOverride": "Corrected merchant name",
+      "merchantOverrideHint": "Leave empty to keep the label from your statement. The original is never overwritten.",
+      "originalLabel": "Label on the statement",
+      "importedNotice": "This line comes from an imported statement. Its original label is kept as is; your correction is stored separately.",
+      "amount": "Amount ({{currency}})",
+      "amountHint": "For example 13.49 — up to two decimals.",
+      "amountError": "Enter a positive amount with at most two decimals.",
+      "date": "Date",
+      "dateHint": "Format YYYY-MM-DD, for example 2026-09-05.",
+      "dateError": "Enter a real date in YYYY-MM-DD format.",
+      "category": "Category",
+      "notes": "Note (optional)",
+      "submitCreate": "Add transaction",
+      "submitUpdate": "Save changes",
+      "delete": "Delete this transaction",
+      "deleteConfirm": "This deletes the transaction and any recurrence built on it. It cannot be undone."
+    }
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "empty": "No recurring payment detected yet.",
+    "fields": {
+      "amount": "Amount",
+      "frequency": "Frequency",
+      "annualCost": "Yearly cost",
+      "lastPayment": "Last payment",
+      "nextPayment": "Next payment (estimate)",
+      "confidence": "Confidence",
+      "status": "Status",
+      "category": "Category"
+    },
+    "status": {
+      "TO_CONFIRM": "To confirm",
+      "CONFIRMED": "Confirmed",
+      "MODIFIED": "Edited by you",
+      "REJECTED": "Ignored",
+      "CANCELLED": "Cancelled"
+    },
+    "confidence": {
+      "HIGH": "High",
+      "MEDIUM": "Medium",
+      "LOW": "Low"
+    },
+    "actions": {
+      "confirm": "Confirm",
+      "modify": "Change frequency",
+      "reject": "Not a subscription",
+      "compare": "Compare offers"
+    },
+    "nextPaymentNotice": "Estimated from your payment history — not a guarantee."
+  },
+  "comparison": {
+    "title": "Compare",
+    "currentCost": "Your current plan costs {{annual}} per year.",
+    "none": "No verified alternative available.",
+    "openOffer": "Open the official page",
+    "currentPlan": "Current plan",
+    "alternativeCost": "This option costs {{annual}} per year.",
+    "monthlyCost": "Monthly equivalent",
+    "annualCost": "Cost over 12 months",
+    "savings": "You would save {{amount}} per year ({{percentage}}%).",
+    "noSavings": "This option is not cheaper than your current plan.",
+    "lastVerified": "Last checked on {{date}}",
+    "nextCheck": "Next check on {{date}}",
+    "freshnessFresh": "Verified price",
+    "freshnessStale": "Price not rechecked recently — shown for reference only",
+    "freshnessExpired": "Verification overdue",
+    "matchSuggested": "Suggestion to verify",
+    "affiliateNotice": "Affiliate link — we may earn a commission. This never affects the ranking.",
+    "openAffiliate": "Open the partner page",
+    "commitment": "Commitment: {{months}} months",
+    "noCommitment": "No commitment",
+    "refresh": "Refresh",
+    "refreshHint": "Recomputes the match against verified offers. No price is collected automatically.",
+    "features": "Included"
+  },
+  "savings": {
+    "title": "Savings",
+    "potential": "Potential savings",
+    "potentialHint": "Found by comparing your subscriptions. Nothing is confirmed until you say so.",
+    "confirmed": "Confirmed savings",
+    "confirmedHint": "What you told us you actually saved.",
+    "goal": {
+      "title": "Savings goal",
+      "target": "Target",
+      "achieved": "Achieved",
+      "progress": "{{value}} of your goal",
+      "none": "No savings goal yet.",
+      "create": "Set a goal",
+      "noneHint": "Set a target to track what your cancellations actually save you.",
+      "targetLabel": "Target amount ({{currency}})",
+      "createHint": "The amount you want to save. You can change it later.",
+      "status": "Status",
+      "statuses": {
+        "ACTIVE": "In progress",
+        "REACHED": "Reached",
+        "ABANDONED": "Abandoned"
+      },
+      "confirmLabel": "Amount actually saved ({{currency}})",
+      "confirmHint": "Nothing is confirmed until you enter it here. Potential savings stay separate.",
+      "confirmSubmit": "Confirm this amount",
+      "delete": "Delete this goal"
+    },
+    "actions": {
+      "title": "Recommended actions",
+      "empty": "No recommendation right now."
+    },
+    "scopeNotice": "No transfers, no savings pot, no investment: this screen only tracks what you decided to save."
+  },
+  "settings": {
+    "title": "Settings",
+    "preferences": "Preferences",
+    "language": "Language",
+    "country": "Country",
+    "currency": "Currency",
+    "preferencesSaved": "Preferences saved.",
+    "plan": "Plan",
+    "planFree": "Free",
+    "planPlus": "Plus",
+    "upgrade": "See Plus",
+    "manageSubscription": "Manage subscription",
+    "account": "Account",
+    "exportData": "Export my data",
+    "deleteAccount": "Delete my account",
+    "legal": "Legal",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "cookies": "Cookies and trackers",
+    "help": "Help",
+    "contact": "Contact",
+    "version": "Version {{version}}"
+  },
+  "billing": {
+    "pricing": {
+      "title": "Free and Plus",
+      "subtitle": "Prices are shown and charged by the app store.",
+      "free": "Free",
+      "plus": "Plus",
+      "features": {
+        "csvImport": "CSV import",
+        "pdfImport": "PDF import",
+        "subscriptions": "Detected subscriptions",
+        "dashboard": "Dashboard",
+        "priceAlerts": "Price increase alerts",
+        "comparison": "Comparison",
+        "goals": "Savings goals",
+        "history": "Full history"
+      },
+      "freeValues": {
+        "csvImport": "1 import",
+        "pdfImport": "Trial only",
+        "subscriptions": "Up to 5",
+        "dashboard": "Basic",
+        "priceAlerts": "No",
+        "comparison": "Limited",
+        "goals": "1 goal",
+        "history": "No"
+      },
+      "plusValues": {
+        "csvImport": "Unlimited",
+        "pdfImport": "Unlimited",
+        "subscriptions": "Unlimited",
+        "dashboard": "Advanced",
+        "priceAlerts": "Yes",
+        "comparison": "Advanced",
+        "goals": "Multiple",
+        "history": "Yes"
+      },
+      "storeNotice": "Payment is handled by Google Play or the App Store. We never see or store your card details."
+    },
+    "manage": {
+      "title": "Manage your subscription",
+      "description": "Subscriptions are managed by the store you bought them from.",
+      "openStore": "Open store settings",
+      "cancelNotice": "If you cancel, you keep Plus until the end of the period you already paid for.",
+      "androidPath": "Google Play → Payments and subscriptions → Subscriptions",
+      "iosPath": "Settings → your name → Subscriptions",
+      "currentPlan": "Current plan",
+      "planFree": "Free",
+      "planPlus": "Plus",
+      "renewsOn": "Renews on {{date}}",
+      "accessUntil": "Cancelled — paid access until {{date}}",
+      "noSubscription": "You are on the Free plan. Nothing is billed."
+    },
+    "purchase": {
+      "title": "Subscribe to Plus",
+      "monthly": "Subscribe monthly",
+      "yearly": "Subscribe yearly",
+      "alreadyPlus": "You already have Plus",
+      "cancelled": "Purchase cancelled.",
+      "verified": "Purchase verified. Your plan has been updated.",
+      "serverNotice": "The store charges you and issues a receipt. Your plan is granted only after our server verifies that receipt with the store.",
+      "unavailableHint": "Everything else in the app works normally. Only the purchase itself needs a native build.",
+      "unavailable": {
+        "NATIVE_MODULE_UNAVAILABLE": "In-app purchase is not available in Expo Go: it needs a development build.",
+        "NOT_CONFIGURED": "In-app purchase is not configured on this build.",
+        "UNSUPPORTED_PLATFORM": "In-app purchase is not available on this platform."
+      },
+      "failed": {
+        "NO_OFFERING": "This plan is not offered by the store right now.",
+        "NO_PROOF": "The store did not return a receipt. Nothing was charged to your account by us.",
+        "STORE_ERROR": "The store could not complete the purchase.",
+        "TIMEOUT": "The store did not answer in time. If you were charged, the purchase will be picked up the next time you open the app."
+      }
+    }
+  },
+  "account": {
+    "export": {
+      "title": "Export my data",
+      "description": "You get a JSON file with your account, expenses, detections, savings goals and subscription status. It never contains passwords or security tokens.",
+      "submit": "Export",
+      "success": "Export ready."
+    },
+    "delete": {
+      "title": "Delete my account",
+      "warning": "This is irreversible. Your expenses, detections, savings goals and sessions are deleted permanently.",
+      "confirmationLabel": "Type DELETE_MY_ACCOUNT to confirm",
+      "submit": "Delete permanently",
+      "blockedTitle": "Cancel your paid subscription first",
+      "blockedDescription": "Your Plus subscription is still active. Cancel it and you can delete your account straight away — you do not have to wait until the end of the period you already paid for.",
+      "blockedAction": "Manage my subscription"
+    }
+  },
+  "legal": {
+    "privacy": {
+      "title": "Privacy policy",
+      "intro": "We process only what the app needs to work: your account, the expenses you import, and the detections computed from them.",
+      "noTrackers": "No advertising SDK and no third-party behavioural analytics are embedded in this app.",
+      "files": "Statement files are stored in a temporary folder, processed, and deleted immediately — including when processing fails.",
+      "rights": "You can export all your data as JSON and delete your account at any time from Settings.",
+      "retention": "Your data is kept as long as your account exists. Deleting your account deletes it permanently."
+    },
+    "terms": {
+      "title": "Terms of use",
+      "service": "Subscription Manager reads bank statements you provide to detect recurring payments and estimate their cost.",
+      "notAdvice": "The app is not a bank and does not provide financial, tax or investment advice. Figures are estimates based on the files you import.",
+      "account": "An account is required. You are responsible for keeping your password safe.",
+      "billing": "Paid plans are billed by Google Play or the App Store, under their own terms.",
+      "termination": "You can stop using the service and delete your account at any time."
+    },
+    "cookies": {
+      "title": "Cookies and trackers",
+      "app": "The mobile app uses no cookies. Your session is a token stored in the device secure storage.",
+      "noAds": "There is no advertising SDK, no behavioural analytics SDK, and no advertising identifier in this app.",
+      "web": "The public web pages use only what is strictly necessary to serve the page."
+    }
+  },
+  "help": {
+    "title": "Help",
+    "importTitle": "Which files can I import?",
+    "importBody": "CSV exports from your bank work best. PDF statements work when their structure is readable — always check the preview before confirming.",
+    "detectionTitle": "How are subscriptions detected?",
+    "detectionBody": "By comparing dates and amounts of payments to the same merchant. The rules are fixed and give the same result every time. You can always confirm, change or reject a detection.",
+    "currencyTitle": "Why are some expenses excluded from my totals?",
+    "currencyBody": "Because they are in another currency. We never convert without a verified exchange rate, so they are listed separately.",
+    "deleteTitle": "How do I delete my account?",
+    "deleteBody": "From Settings → Delete my account. If you have an active paid subscription, cancel it first."
+  },
+  "contact": {
+    "title": "Contact",
+    "description": "Send us an email and we will get back to you.",
+    "email": "support@subscription-manager.example",
+    "openMail": "Write an email"
+  },
+  "frequency": {
+    "ONCE": "One-off",
+    "WEEKLY": "Weekly",
+    "MONTHLY": "Monthly",
+    "QUARTERLY": "Quarterly",
+    "YEARLY": "Yearly",
+    "IRREGULAR_RECURRING": "Irregular but recurring"
+  },
+  "category": {
+    "ENTERTAINMENT": "Entertainment",
+    "SOFTWARE": "Software",
+    "STREAMING": "Streaming",
+    "MUSIC": "Music",
+    "GAMING": "Gaming",
+    "FITNESS": "Fitness",
+    "NEWS": "News",
+    "CLOUD": "Cloud",
+    "TELECOM": "Telecom",
+    "INSURANCE": "Insurance",
+    "FINANCE": "Finance",
+    "EDUCATION": "Education",
+    "PRODUCTIVITY": "Productivity",
+    "FOOD": "Food",
+    "TRANSPORT": "Transport",
+    "SHOPPING": "Shopping",
+    "OTHER": "Other"
+  },
+  "errors": {
+    "NETWORK_ERROR": "No connection. Check your network and try again.",
+    "VALIDATION_ERROR": "Some information is invalid. Check the form and try again.",
+    "RATE_LIMITED": "Too many attempts. Please wait a moment and try again.",
+    "INTERNAL_ERROR": "Something went wrong on our side. Please try again.",
+    "NOT_FOUND": "This item no longer exists.",
+    "AUTH_UNAUTHORIZED": "Your session has expired. Please log in again.",
+    "AUTH_INVALID_CREDENTIALS": "Email or password is incorrect.",
+    "AUTH_EMAIL_ALREADY_EXISTS": "An account already exists with this email address.",
+    "AUTH_RESET_TOKEN_INVALID": "This reset link is not valid.",
+    "AUTH_RESET_TOKEN_EXPIRED": "This reset link has expired. Ask for a new one.",
+    "ACCOUNT_DELETION_BLOCKED_ACTIVE_SUBSCRIPTION": "Cancel your paid subscription before deleting your account.",
+    "IMPORT_FILE_INVALID": "We could not read this file. Check that it is a CSV or PDF statement.",
+    "IMPORT_FILE_TOO_LARGE": "This file is too large.",
+    "IMPORT_FILE_TOO_MANY_ROWS": "This file has too many lines.",
+    "IMPORT_FILE_TOO_MANY_PAGES": "This PDF has too many pages.",
+    "IMPORT_DELIMITER_AMBIGUOUS": "We could not tell which separator your file uses. Please choose it.",
+    "IMPORT_MAPPING_REQUIRED": "Tell us which columns hold the date, description and amount.",
+    "IMPORT_PREVIEW_EXPIRED": "This preview has expired. Please import the file again.",
+    "IMPORT_BATCH_ALREADY_ROLLED_BACK": "This import has already been undone.",
+    "IMPORT_PDF_REQUIRES_PLUS": "PDF import is part of Plus beyond the free trial.",
+    "IMPORT_QUOTA_REACHED": "You have reached the import limit of the Free plan this month.",
+    "unknown": "Something went wrong. Please try again.",
+    "ADMIN_FORBIDDEN": "This area is reserved for administration.",
+    "AI_QUOTA_EXCEEDED": "You have used all your AI credits for this month.",
+    "AI_UNAVAILABLE": "The assistant is unavailable right now. Everything else works as usual.",
+    "BILLING_PRODUCT_UNKNOWN": "This offer is unavailable. Try again from the subscription screen.",
+    "BILLING_VERIFICATION_FAILED": "The store did not confirm this purchase. Nothing has been charged by us.",
+    "BILLING_PURCHASE_ALREADY_LINKED": "This purchase is already linked to another account.",
+    "BILLING_STORE_UNAVAILABLE": "The store is unreachable. Try again in a few minutes.",
+    "WEBHOOK_SIGNATURE_INVALID": "Unauthenticated request."
+  },
+  "rows": {
+    "CSV_MISSING_DATE": "Date missing",
+    "CSV_INVALID_DATE": "Date not readable",
+    "CSV_MISSING_DESCRIPTION": "Description missing",
+    "CSV_MISSING_AMOUNT": "Amount missing",
+    "CSV_INVALID_AMOUNT": "Amount not readable",
+    "CSV_AMBIGUOUS_DATE": "Ambiguous date — confirm how to read it",
+    "CSV_INVALID_CURRENCY": "Unsupported currency",
+    "CSV_DUPLICATE": "Possible duplicate",
+    "CSV_REFUND": "Refund — excluded from expenses",
+    "PDF_LOW_CONFIDENCE_LINE": "Read with low confidence — please check"
+  },
+  "a11y": {
+    "kpiCard": "{{label}}: {{value}} for {{period}}",
+    "chartBar": "{{month}}: {{value}}",
+    "chartSummary": "Spending chart over the last {{count}} months",
+    "languageSelector": "Select the app language",
+    "loading": "Loading in progress"
+  },
+  "ai": {
+    "title": "Assistant",
+    "subtitle": "Three fixed uses, built from figures already calculated by the app. No open chat, no free-text question.",
+    "pending": "Writing…",
+    "quota": "{{count}} credits left this month",
+    "degraded": "Standard answer",
+    "disclaimer": "The assistant puts existing figures into words. It is not financial advice and it never changes your data.",
+    "tasks": {
+      "MONTHLY_SUMMARY": "Summarise my month",
+      "EXPLAIN_INCREASE": "Explain my increase",
+      "RECOMMENDATION": "One recommendation"
+    },
+    "uncertainty": {
+      "label": "Confidence",
+      "NONE": "Certain",
+      "LOW": "High",
+      "MEDIUM": "Moderate",
+      "HIGH": "Low"
+    }
+  }
+}

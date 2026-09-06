@@ -1,0 +1,115 @@
+{
+  "common": {
+    "appName": "Subscription Manager",
+    "backToHome": "Home",
+    "lastUpdated": "Last updated: {date}",
+    "footer": "{company} — this website hosts the legal documents for the mobile app.",
+    "nav": {
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies",
+      "help": "Help",
+      "contact": "Contact"
+    }
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "intro": "This policy explains what the app does with your data. It is written to be read, not to be skimmed past.",
+    "controllerTitle": "Who is responsible",
+    "controllerBody": "{company} is the data controller. You can reach us at {email} for any question about your data.",
+    "dataTitle": "What we collect",
+    "dataIntro": "Only what the app needs to work:",
+    "dataItems": {
+      "account": "Your email address and password (stored only as an Argon2id hash — never in clear text, never recoverable).",
+      "preferences": "Your language, country and currency.",
+      "statements": "The transactions extracted from the bank statements you import: date, amount, currency and merchant label.",
+      "subscription": "Your plan (Free or Plus) and, if you subscribe, the subscription identifiers returned by Google Play or the App Store."
+    },
+    "noBankTitle": "What we never collect",
+    "noBankIntro": "The following never reaches our servers:",
+    "noBankItems": {
+      "credentials": "Your online banking credentials. The app has no connection to your bank: you import a file yourself.",
+      "card": "Your card details. Payment is handled entirely by your Google or Apple account.",
+      "trackers": "Any advertising or behavioural analytics data. The app embeds no advertising SDK and no third-party analytics SDK."
+    },
+    "fileTitle": "Imported files",
+    "fileBody": "A statement you upload is analysed and then deleted immediately, whether the analysis succeeds or fails. Only the extracted transactions are kept, in your account.",
+    "aiTitle": "AI assistant",
+    "aiBody": "The optional assistant only receives figures already computed by the app (monthly totals, detected increases, merchant names). It never receives your password, your session token, or any other user's data — and it can never modify or delete anything.",
+    "rightsTitle": "Your rights",
+    "rightsIntro": "Under the GDPR you can, directly from the app:",
+    "rightsItems": {
+      "access": "Export all of your data in JSON format, from Settings.",
+      "erase": "Delete your account. Deletion is immediate and irreversible: it removes your transactions, detections, savings goals and sessions.",
+      "rectify": "Correct any imported transaction, or delete it.",
+      "portability": "Reuse the JSON export elsewhere: it is a plain, open format."
+    },
+    "retentionTitle": "How long we keep it",
+    "retentionBody": "Your data lives as long as your account does. Deleting the account deletes the data — there is no delayed retention, no archive copy.",
+    "complaintTitle": "Complaints",
+    "complaintBody": "If you consider that your rights are not respected, you may lodge a complaint with your national data protection authority."
+  },
+  "terms": {
+    "title": "Terms of use",
+    "intro": "By using the app, you accept these terms.",
+    "serviceTitle": "What the app does",
+    "serviceBody": "The app reads bank statements you import, detects recurring payments, and computes what they cost you. It is an information tool.",
+    "notAdviceTitle": "What it is not",
+    "notAdviceBody": "The app provides no investment advice, no credit advice, no solvency assessment, and guarantees no financial outcome. Detected recurrences and estimated dates are computed from your own history: they are estimates, not certainties. Always check an amount against your bank statement before acting on it.",
+    "accountTitle": "Your account",
+    "accountBody": "An account is required. You are responsible for keeping your password confidential. We can never read it, and therefore can never recover it — only reset it.",
+    "plansTitle": "Free and Plus plans",
+    "plansBody": "The Free plan is usable indefinitely. The Plus plan is a subscription billed by Google Play or the App Store, at the price shown by the store for your country. We never handle your payment details.",
+    "cancelTitle": "Cancelling",
+    "cancelBody": "You cancel from your Google Play or Apple account settings. On cancellation you keep paid access until the end of the period you have already paid for — access is not cut off early. Your account can be deleted at any time, including before that period ends.",
+    "availabilityTitle": "Availability",
+    "availabilityBody": "The service is provided as is. Interruptions may occur, for maintenance or otherwise.",
+    "changesTitle": "Changes",
+    "changesBody": "These terms may change. The date below indicates the current version."
+  },
+  "cookies": {
+    "title": "Cookies",
+    "shortTitle": "The short version",
+    "shortBody": "This website sets no cookies, and the mobile app contains no tracker.",
+    "siteTitle": "This website",
+    "siteBody": "These pages are static text. They set no cookie, no local storage entry, and no tracking identifier. There is nothing to accept or refuse — which is why you see no consent banner.",
+    "appTitle": "The mobile app",
+    "appIntro": "The app stores two things on your device, and nothing else:",
+    "appItems": {
+      "session": "Your session token, in the device's secure storage (Keychain / Keystore), so you do not have to sign in on every launch.",
+      "preferences": "Your interface preferences."
+    },
+    "appOutro": "It contains no advertising SDK, no behavioural analytics SDK, and no advertising identifier."
+  },
+  "help": {
+    "title": "Help",
+    "importTitle": "Importing a statement",
+    "importBody": "Download a CSV or PDF statement from your bank, then import it from the app. The file is analysed on our servers and deleted immediately afterwards. Nothing is written to your account until you confirm the preview.",
+    "formatsTitle": "Supported formats",
+    "formatsBody": "CSV statements are supported on the Free plan. PDF statements require the Plus plan, beyond a limited trial. A scanned PDF with no text layer cannot be read.",
+    "detectionTitle": "Detected recurrences",
+    "detectionBody": "Detection is deterministic: the same statement always gives the same result, and no AI is involved. If a recurrence is wrong, you can correct its frequency or ignore it — your correction takes precedence over the engine.",
+    "currencyTitle": "Multiple currencies",
+    "currencyBody": "Totals are computed in your account currency only. Transactions in another currency are excluded from the totals and reported separately: we never convert an amount without a verified exchange rate.",
+    "billingTitle": "Subscription and billing",
+    "billingBody": "Plus is billed by Google Play or the App Store. Cancel from your store account settings; you keep paid access until the end of the period already paid for.",
+    "deleteTitle": "Deleting your account",
+    "deleteBody": "Deletion is immediate and irreversible. It is blocked only while a paid subscription is still active and not yet cancelled: cancel first, and deletion is unlocked straight away.",
+    "contactBody": "Still stuck? Write to {email}."
+  },
+  "contact": {
+    "title": "Contact",
+    "intro": "One address, for everything: {email}.",
+    "topicsTitle": "What to include",
+    "topicsIntro": "To get a useful answer quickly, tell us:",
+    "topicsItems": {
+      "account": "The email address of your account (never send your password — we will never ask for it).",
+      "device": "Your device and OS version, if you are reporting a bug.",
+      "context": "What you were doing and what you expected instead."
+    },
+    "privacyTitle": "Data requests",
+    "privacyBody": "For access, rectification or erasure requests, you can act directly from the app: Settings offers a full export and account deletion. Write to us if something blocks you.",
+    "securityTitle": "Reporting a vulnerability",
+    "securityBody": "If you believe you have found a security flaw, write to the same address with the subject \"Security\". Please do not publish it before we have had a chance to fix it."
+  }
+}

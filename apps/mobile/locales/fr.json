@@ -1,0 +1,566 @@
+{
+  "common": {
+    "appName": "Gestionnaire d'abonnements",
+    "continue": "Continuer",
+    "back": "Retour",
+    "retry": "Réessayer",
+    "loading": "Chargement…",
+    "empty": "Rien à afficher pour l'instant",
+    "of": "sur",
+    "estimate": "Estimation"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Importez votre relevé bancaire. Repérez vos abonnements. Trouvez des économies.",
+      "subtitle": "Gestionnaire d'abonnements lit le relevé que vous avez déjà. Ce n'est pas une banque et il ne donne aucun conseil financier.",
+      "getStarted": "Commencer",
+      "logIn": "Se connecter",
+      "languageLabel": "Langue de l'application",
+      "step": "Étape {{current}} sur {{total}}"
+    },
+    "preferences": {
+      "title": "Langue, pays et devise",
+      "subtitle": "Ces trois réglages sont indépendants. En changer un ne change jamais les autres.",
+      "language": "Langue",
+      "country": "Pays",
+      "currency": "Devise",
+      "countryHint": "Sert à lire les dates et les montants de vos relevés.",
+      "currencyHint": "Sert à vos totaux. Les dépenses dans une autre devise sont affichées à part."
+    },
+    "privacy": {
+      "title": "Vos données restent les vôtres",
+      "noTrackers": "Aucun SDK publicitaire, aucun analytics comportemental tiers. Jamais.",
+      "fileDeleted": "Le fichier de votre relevé est supprimé de nos serveurs immédiatement après traitement.",
+      "exportable": "Vous pouvez exporter ou supprimer votre compte et toutes ses données à tout moment.",
+      "accountRequired": "Un compte est nécessaire pour utiliser l'application. Il n'y a pas de mode invité.",
+      "accept": "J'ai compris, créer mon compte",
+      "readPolicy": "Lire la politique de confidentialité"
+    }
+  },
+  "auth": {
+    "register": {
+      "title": "Créez votre compte",
+      "subtitle": "Dernière étape avant votre premier import.",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "passwordHint": "12 caractères minimum.",
+      "submit": "Créer le compte",
+      "haveAccount": "J'ai déjà un compte"
+    },
+    "login": {
+      "title": "Connexion",
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "forgot": "Mot de passe oublié ?",
+      "noAccount": "Créer un compte"
+    },
+    "forgotPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Nous envoyons un lien de réinitialisation si un compte existe.",
+      "email": "Adresse e-mail",
+      "submit": "Envoyer le lien",
+      "sent": "Si un compte correspondant existe, un e-mail de réinitialisation a été envoyé.",
+      "backToLogin": "Retour à la connexion"
+    },
+    "logout": "Se déconnecter",
+    "resetPassword": {
+      "title": "Choisissez un nouveau mot de passe",
+      "subtitle": "Le lien est valable une seule fois, et pour une courte durée.",
+      "password": "Nouveau mot de passe",
+      "passwordHint": "Au moins 12 caractères.",
+      "confirmPassword": "Confirmez le nouveau mot de passe",
+      "mismatch": "Les deux mots de passe ne correspondent pas.",
+      "submit": "Mettre à jour mon mot de passe",
+      "done": "Mot de passe mis à jour. Toutes vos autres sessions ont été déconnectées.",
+      "backToLogin": "Aller à la connexion",
+      "missingToken": "Ce lien est incomplet. Demandez un nouvel e-mail de réinitialisation."
+    }
+  },
+  "import": {
+    "title": "Importer un relevé",
+    "chooseSource": {
+      "title": "Quel fichier avez-vous ?",
+      "csvTitle": "Fichier CSV",
+      "csvDescription": "Recommandé. Exporté depuis votre banque en quelques clics, et lu de façon fiable.",
+      "pdfTitle": "Relevé PDF",
+      "pdfDescription": "Compatible avec les relevés PDF présentant une structure lisible. Vérifiez toujours les résultats avant confirmation.",
+      "pdfPlusRequired": "L'import PDF fait partie de l'offre Plus au-delà de l'essai gratuit."
+    },
+    "upload": {
+      "title": "Sélectionnez votre fichier",
+      "pick": "Choisir un fichier",
+      "selected": "Sélectionné : {{name}}",
+      "hint": "{{size}} Mo maximum. Le fichier est supprimé juste après traitement.",
+      "submit": "Analyser le fichier",
+      "pickerFailed": "Le sélecteur de fichiers n’a pas pu s’ouvrir. Vérifiez les autorisations de l’application et réessayez.",
+      "defaultFileName": "releve"
+    },
+    "mapping": {
+      "title": "Indiquez vos colonnes",
+      "subtitle": "Nous n'avons pas reconnu les colonnes automatiquement. Dites-nous où se trouve chaque valeur.",
+      "date": "Colonne date",
+      "description": "Colonne libellé",
+      "amount": "Colonne montant",
+      "submit": "Appliquer et analyser"
+    },
+    "review": {
+      "title": "Vérifiez avant d'importer",
+      "detected": "{{count}} transactions détectées",
+      "currency": "Devise",
+      "dateOrder": "Dates lues en {{order}}",
+      "dateOrderDMY": "jour/mois/année",
+      "dateOrderMDY": "mois/jour/année",
+      "debits": "Débits",
+      "credits": "Crédits",
+      "sections": {
+        "valid": "Prêtes à importer",
+        "duplicate": "Doublons possibles",
+        "refund": "Remboursements (exclus)",
+        "skipped": "Crédits (pas des dépenses)",
+        "invalid": "Lignes illisibles"
+      },
+      "rowNumber": "Ligne {{number}}",
+      "include": "Inclure",
+      "exclude": "Exclure",
+      "cancelImport": "Annuler l'import",
+      "submit": "Importer {{count}} transactions",
+      "duplicateHigh": "Déjà enregistrée — ne peut pas être importée.",
+      "duplicateMedium": "Peut-être déjà enregistrée — à vous de décider.",
+      "pdfNotice": "Compatible avec les relevés PDF présentant une structure lisible. Vérifiez toujours les résultats avant confirmation."
+    },
+    "confirm": {
+      "title": "Import terminé",
+      "imported": "{{count}} transactions importées",
+      "rejected": "{{count}} lignes non importées",
+      "duplicates": "{{count}} doublons ignorés",
+      "rollback": "Annuler cet import",
+      "rollbackDone": "Import annulé.",
+      "goToDashboard": "Aller au tableau de bord"
+    },
+    "states": {
+      "idle": "Prêt",
+      "uploading": "Envoi en cours…",
+      "parsing": "Lecture de votre relevé…",
+      "preview": "Vérifiez les résultats",
+      "validationError": "Certaines lignes demandent votre attention",
+      "readyToImport": "Prêt à importer",
+      "importing": "Import en cours…",
+      "completed": "Importé",
+      "rollbackAvailable": "Vous pouvez encore annuler cet import"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "kpis": {
+      "monthlyExpenses": "Dépenses du mois",
+      "activeSubscriptions": "Abonnements détectés",
+      "annualRecurringCost": "Coût récurrent par an",
+      "expensesToReview": "Éléments à vérifier"
+    },
+    "sections": {
+      "evolution": "Dépenses des 6 derniers mois",
+      "upcoming": "Prochaines échéances estimées",
+      "priceAlerts": "Hausses de prix",
+      "savings": "Économies",
+      "aiSummary": "Résumé du mois"
+    },
+    "monthOverMonth": {
+      "up": "↑ {{value}} par rapport au mois dernier",
+      "down": "↓ {{value}} par rapport au mois dernier",
+      "unchanged": "Stable par rapport au mois dernier",
+      "noComparison": "Aucune comparaison disponible pour le mois dernier"
+    },
+    "unconverted": {
+      "title": "Non inclus dans ces totaux",
+      "description": "{{count}} dépenses en {{currency}}. Nous ne convertissons jamais sans taux de change vérifié."
+    },
+    "priceAlert": "{{merchant}} : {{previous}} → {{current}} ({{percentage}})",
+    "priceAlertsPlus": "Les alertes de hausse de prix font partie de l'offre Plus.",
+    "empty": {
+      "title": "Aucune donnée pour l'instant",
+      "description": "Importez un relevé bancaire pour voir vos paiements récurrents.",
+      "action": "Importer un relevé"
+    }
+  },
+  "transactions": {
+    "title": "Transactions",
+    "empty": "Aucune transaction pour l'instant.",
+    "addManual": "Ajouter une transaction manquante",
+    "correct": "Corriger cette transaction",
+    "source": {
+      "IMPORT": "Importée",
+      "MANUAL": "Ajoutée manuellement"
+    },
+    "manual": {
+      "newTitle": "Ajouter une transaction manquante",
+      "editTitle": "Corriger cette transaction",
+      "editHint": "Ouvre le formulaire de correction de cette transaction.",
+      "subtitle": "Pour une dépense en espèces ou une ligne absente du relevé.",
+      "secondaryNotice": "L'import de relevé reste le parcours principal. La saisie manuelle sert uniquement aux corrections et aux lignes absentes du relevé.",
+      "merchant": "Commerçant",
+      "merchantHint": "Le nom que vous voulez voir dans votre liste.",
+      "merchantError": "Saisissez un nom de commerçant.",
+      "merchantOverride": "Nom corrigé du commerçant",
+      "merchantOverrideHint": "Laissez vide pour conserver le libellé du relevé. L’original n’est jamais écrasé.",
+      "originalLabel": "Libellé du relevé",
+      "importedNotice": "Cette ligne vient d’un relevé importé. Son libellé d’origine est conservé tel quel ; votre correction est enregistrée à part.",
+      "amount": "Montant ({{currency}})",
+      "amountHint": "Par exemple 13,49 — deux décimales au maximum.",
+      "amountError": "Saisissez un montant positif, avec deux décimales au maximum.",
+      "date": "Date",
+      "dateHint": "Format AAAA-MM-JJ, par exemple 2026-09-05.",
+      "dateError": "Saisissez une date réelle au format AAAA-MM-JJ.",
+      "category": "Catégorie",
+      "notes": "Note (facultatif)",
+      "submitCreate": "Ajouter la transaction",
+      "submitUpdate": "Enregistrer les modifications",
+      "delete": "Supprimer cette transaction",
+      "deleteConfirm": "Cela supprime la transaction et les récurrences qui s’appuyaient dessus. C’est définitif."
+    }
+  },
+  "subscriptions": {
+    "title": "Abonnements",
+    "empty": "Aucun paiement récurrent détecté pour l'instant.",
+    "fields": {
+      "amount": "Montant",
+      "frequency": "Fréquence",
+      "annualCost": "Coût annuel",
+      "lastPayment": "Dernier paiement",
+      "nextPayment": "Prochaine échéance (estimation)",
+      "confidence": "Confiance",
+      "status": "Statut",
+      "category": "Catégorie"
+    },
+    "status": {
+      "TO_CONFIRM": "À confirmer",
+      "CONFIRMED": "Confirmé",
+      "MODIFIED": "Modifié par vous",
+      "REJECTED": "Ignoré",
+      "CANCELLED": "Annulé"
+    },
+    "confidence": {
+      "HIGH": "Élevée",
+      "MEDIUM": "Moyenne",
+      "LOW": "Faible"
+    },
+    "actions": {
+      "confirm": "Confirmer",
+      "modify": "Changer la fréquence",
+      "reject": "Ce n'est pas un abonnement",
+      "compare": "Comparer les offres"
+    },
+    "nextPaymentNotice": "Estimée d'après votre historique de paiements — ce n'est pas une garantie."
+  },
+  "comparison": {
+    "title": "Comparaison",
+    "currentCost": "Votre offre actuelle coûte {{annual}} par an.",
+    "none": "Aucune alternative vérifiée disponible.",
+    "openOffer": "Ouvrir la page officielle",
+    "currentPlan": "Offre actuelle",
+    "alternativeCost": "Cette offre coûte {{annual}} par an.",
+    "monthlyCost": "Équivalent mensuel",
+    "annualCost": "Coût sur 12 mois",
+    "savings": "Vous économiseriez {{amount}} par an ({{percentage}} %).",
+    "noSavings": "Cette offre n’est pas moins chère que la vôtre.",
+    "lastVerified": "Dernière vérification le {{date}}",
+    "nextCheck": "Prochaine vérification le {{date}}",
+    "freshnessFresh": "Prix vérifié",
+    "freshnessStale": "Prix non revérifié récemment — affiché à titre indicatif",
+    "freshnessExpired": "Vérification échue",
+    "matchSuggested": "Suggestion à vérifier",
+    "affiliateNotice": "Lien affilié — nous pouvons percevoir une commission. Cela n’influence jamais le classement.",
+    "openAffiliate": "Ouvrir la page partenaire",
+    "commitment": "Engagement : {{months}} mois",
+    "noCommitment": "Sans engagement",
+    "refresh": "Actualiser",
+    "refreshHint": "Recalcule le rapprochement sur les offres vérifiées. Aucun prix n’est collecté automatiquement.",
+    "features": "Inclus"
+  },
+  "savings": {
+    "title": "Économies",
+    "potential": "Économies potentielles",
+    "potentialHint": "Trouvées en comparant vos abonnements. Rien n'est confirmé tant que vous ne l'avez pas validé.",
+    "confirmed": "Économies confirmées",
+    "confirmedHint": "Ce que vous nous avez déclaré avoir réellement économisé.",
+    "goal": {
+      "title": "Objectif d'épargne",
+      "target": "Objectif",
+      "achieved": "Atteint",
+      "progress": "{{value}} de votre objectif",
+      "none": "Aucun objectif d'épargne pour l'instant.",
+      "create": "Définir un objectif",
+      "noneHint": "Fixez un objectif pour suivre ce que vos résiliations vous font réellement gagner.",
+      "targetLabel": "Montant visé ({{currency}})",
+      "createHint": "Le montant que vous voulez économiser. Vous pourrez le modifier.",
+      "status": "Statut",
+      "statuses": {
+        "ACTIVE": "En cours",
+        "REACHED": "Atteint",
+        "ABANDONED": "Abandonné"
+      },
+      "confirmLabel": "Montant réellement économisé ({{currency}})",
+      "confirmHint": "Rien n’est confirmé tant que vous ne l’avez pas saisi ici. Les économies potentielles restent à part.",
+      "confirmSubmit": "Confirmer ce montant",
+      "delete": "Supprimer cet objectif"
+    },
+    "actions": {
+      "title": "Actions recommandées",
+      "empty": "Aucune recommandation pour le moment."
+    },
+    "scopeNotice": "Aucun virement, aucune cagnotte, aucun investissement : cet écran suit uniquement ce que vous décidez d’économiser."
+  },
+  "settings": {
+    "title": "Paramètres",
+    "preferences": "Préférences",
+    "language": "Langue",
+    "country": "Pays",
+    "currency": "Devise",
+    "preferencesSaved": "Préférences enregistrées.",
+    "plan": "Offre",
+    "planFree": "Free",
+    "planPlus": "Plus",
+    "upgrade": "Découvrir Plus",
+    "manageSubscription": "Gérer l'abonnement",
+    "account": "Compte",
+    "exportData": "Exporter mes données",
+    "deleteAccount": "Supprimer mon compte",
+    "legal": "Mentions légales",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "cookies": "Cookies et traceurs",
+    "help": "Aide",
+    "contact": "Contact",
+    "version": "Version {{version}}"
+  },
+  "billing": {
+    "pricing": {
+      "title": "Free et Plus",
+      "subtitle": "Les prix sont affichés et facturés par la boutique d'applications.",
+      "free": "Free",
+      "plus": "Plus",
+      "features": {
+        "csvImport": "Import CSV",
+        "pdfImport": "Import PDF",
+        "subscriptions": "Abonnements détectés",
+        "dashboard": "Tableau de bord",
+        "priceAlerts": "Alertes de hausse de prix",
+        "comparison": "Comparaison",
+        "goals": "Objectifs d'épargne",
+        "history": "Historique complet"
+      },
+      "freeValues": {
+        "csvImport": "1 import",
+        "pdfImport": "Essai uniquement",
+        "subscriptions": "Jusqu'à 5",
+        "dashboard": "Basique",
+        "priceAlerts": "Non",
+        "comparison": "Limitée",
+        "goals": "1 objectif",
+        "history": "Non"
+      },
+      "plusValues": {
+        "csvImport": "Illimité",
+        "pdfImport": "Illimité",
+        "subscriptions": "Illimités",
+        "dashboard": "Avancé",
+        "priceAlerts": "Oui",
+        "comparison": "Avancée",
+        "goals": "Multiples",
+        "history": "Oui"
+      },
+      "storeNotice": "Le paiement est géré par Google Play ou l'App Store. Nous ne voyons ni ne stockons vos données de carte."
+    },
+    "manage": {
+      "title": "Gérer votre abonnement",
+      "description": "Les abonnements sont gérés par la boutique où vous les avez souscrits.",
+      "openStore": "Ouvrir les réglages de la boutique",
+      "cancelNotice": "Si vous résiliez, vous conservez Plus jusqu'à la fin de la période déjà payée.",
+      "androidPath": "Google Play → Paiements et abonnements → Abonnements",
+      "iosPath": "Réglages → votre nom → Abonnements",
+      "currentPlan": "Offre en cours",
+      "planFree": "Free",
+      "planPlus": "Plus",
+      "renewsOn": "Renouvellement le {{date}}",
+      "accessUntil": "Résilié — accès payant jusqu’au {{date}}",
+      "noSubscription": "Vous êtes sur l’offre Free. Rien ne vous est facturé."
+    },
+    "purchase": {
+      "title": "Souscrire à Plus",
+      "monthly": "Souscrire au mois",
+      "yearly": "Souscrire à l'année",
+      "alreadyPlus": "Vous avez déjà l’offre Plus",
+      "cancelled": "Achat annulé.",
+      "verified": "Achat vérifié. Votre offre a été mise à jour.",
+      "serverNotice": "La boutique vous facture et délivre un reçu. Votre offre n’est accordée qu’après vérification de ce reçu par notre serveur auprès de la boutique.",
+      "unavailableHint": "Tout le reste de l’application fonctionne normalement. Seul l’achat lui-même exige un build natif.",
+      "unavailable": {
+        "NATIVE_MODULE_UNAVAILABLE": "L’achat intégré n’est pas disponible dans Expo Go : il exige un development build.",
+        "NOT_CONFIGURED": "L’achat intégré n’est pas configuré sur cette version.",
+        "UNSUPPORTED_PLATFORM": "L’achat intégré n’est pas disponible sur cette plateforme."
+      },
+      "failed": {
+        "NO_OFFERING": "Cette offre n’est pas proposée par la boutique actuellement.",
+        "NO_PROOF": "La boutique n’a renvoyé aucun reçu. Rien ne vous a été facturé de notre côté.",
+        "STORE_ERROR": "La boutique n’a pas pu finaliser l’achat.",
+        "TIMEOUT": "La boutique n’a pas répondu à temps. Si vous avez été débité, l’achat sera repris au prochain lancement de l’application."
+      }
+    }
+  },
+  "account": {
+    "export": {
+      "title": "Exporter mes données",
+      "description": "Vous obtenez un fichier JSON avec votre compte, vos dépenses, vos détections, vos objectifs d'épargne et l'état de votre abonnement. Il ne contient jamais de mot de passe ni de jeton de sécurité.",
+      "submit": "Exporter",
+      "success": "Export prêt."
+    },
+    "delete": {
+      "title": "Supprimer mon compte",
+      "warning": "Cette action est irréversible. Vos dépenses, détections, objectifs d'épargne et sessions sont supprimés définitivement.",
+      "confirmationLabel": "Saisissez DELETE_MY_ACCOUNT pour confirmer",
+      "submit": "Supprimer définitivement",
+      "blockedTitle": "Résiliez d'abord votre abonnement payant",
+      "blockedDescription": "Votre abonnement Plus est encore actif. Résiliez-le et vous pourrez supprimer votre compte immédiatement — sans attendre la fin de la période déjà payée.",
+      "blockedAction": "Gérer mon abonnement"
+    }
+  },
+  "legal": {
+    "privacy": {
+      "title": "Politique de confidentialité",
+      "intro": "Nous traitons uniquement ce dont l'application a besoin pour fonctionner : votre compte, les dépenses que vous importez, et les détections calculées à partir de celles-ci.",
+      "noTrackers": "Aucun SDK publicitaire ni analytics comportemental tiers n'est intégré à cette application.",
+      "files": "Les fichiers de relevé sont stockés dans un dossier temporaire, traités, puis supprimés immédiatement — y compris en cas d'échec du traitement.",
+      "rights": "Vous pouvez exporter toutes vos données au format JSON et supprimer votre compte à tout moment depuis les Paramètres.",
+      "retention": "Vos données sont conservées tant que votre compte existe. Supprimer votre compte les supprime définitivement."
+    },
+    "terms": {
+      "title": "Conditions d'utilisation",
+      "service": "Gestionnaire d'abonnements lit les relevés bancaires que vous fournissez pour détecter les paiements récurrents et estimer leur coût.",
+      "notAdvice": "L'application n'est pas une banque et ne fournit aucun conseil financier, fiscal ou en investissement. Les chiffres sont des estimations basées sur les fichiers que vous importez.",
+      "account": "Un compte est nécessaire. Vous êtes responsable de la confidentialité de votre mot de passe.",
+      "billing": "Les offres payantes sont facturées par Google Play ou l'App Store, selon leurs propres conditions.",
+      "termination": "Vous pouvez cesser d'utiliser le service et supprimer votre compte à tout moment."
+    },
+    "cookies": {
+      "title": "Cookies et traceurs",
+      "app": "L'application mobile n'utilise aucun cookie. Votre session est un jeton stocké dans le stockage sécurisé de l'appareil.",
+      "noAds": "Il n'y a aucun SDK publicitaire, aucun SDK d'analytics comportemental et aucun identifiant publicitaire dans cette application.",
+      "web": "Les pages web publiques n'utilisent que le strict nécessaire au service de la page."
+    }
+  },
+  "help": {
+    "title": "Aide",
+    "importTitle": "Quels fichiers puis-je importer ?",
+    "importBody": "Les exports CSV de votre banque fonctionnent le mieux. Les relevés PDF fonctionnent lorsque leur structure est lisible — vérifiez toujours l'aperçu avant de confirmer.",
+    "detectionTitle": "Comment les abonnements sont-ils détectés ?",
+    "detectionBody": "En comparant les dates et les montants des paiements au même commerçant. Les règles sont fixes et donnent le même résultat à chaque fois. Vous pouvez toujours confirmer, modifier ou rejeter une détection.",
+    "currencyTitle": "Pourquoi certaines dépenses sont-elles exclues de mes totaux ?",
+    "currencyBody": "Parce qu'elles sont dans une autre devise. Nous ne convertissons jamais sans taux de change vérifié : elles sont donc listées à part.",
+    "deleteTitle": "Comment supprimer mon compte ?",
+    "deleteBody": "Depuis Paramètres → Supprimer mon compte. Si vous avez un abonnement payant actif, résiliez-le d'abord."
+  },
+  "contact": {
+    "title": "Contact",
+    "description": "Écrivez-nous un e-mail et nous vous répondrons.",
+    "email": "support@subscription-manager.example",
+    "openMail": "Écrire un e-mail"
+  },
+  "frequency": {
+    "ONCE": "Ponctuel",
+    "WEEKLY": "Hebdomadaire",
+    "MONTHLY": "Mensuel",
+    "QUARTERLY": "Trimestriel",
+    "YEARLY": "Annuel",
+    "IRREGULAR_RECURRING": "Irrégulier mais récurrent"
+  },
+  "category": {
+    "ENTERTAINMENT": "Divertissement",
+    "SOFTWARE": "Logiciels",
+    "STREAMING": "Streaming",
+    "MUSIC": "Musique",
+    "GAMING": "Jeux vidéo",
+    "FITNESS": "Sport",
+    "NEWS": "Presse",
+    "CLOUD": "Cloud",
+    "TELECOM": "Télécoms",
+    "INSURANCE": "Assurance",
+    "FINANCE": "Finance",
+    "EDUCATION": "Éducation",
+    "PRODUCTIVITY": "Productivité",
+    "FOOD": "Alimentation",
+    "TRANSPORT": "Transport",
+    "SHOPPING": "Achats",
+    "OTHER": "Autre"
+  },
+  "errors": {
+    "NETWORK_ERROR": "Pas de connexion. Vérifiez votre réseau et réessayez.",
+    "VALIDATION_ERROR": "Certaines informations sont invalides. Vérifiez le formulaire et réessayez.",
+    "RATE_LIMITED": "Trop de tentatives. Patientez un instant avant de réessayer.",
+    "INTERNAL_ERROR": "Un problème est survenu de notre côté. Réessayez.",
+    "NOT_FOUND": "Cet élément n'existe plus.",
+    "AUTH_UNAUTHORIZED": "Votre session a expiré. Reconnectez-vous.",
+    "AUTH_INVALID_CREDENTIALS": "E-mail ou mot de passe incorrect.",
+    "AUTH_EMAIL_ALREADY_EXISTS": "Un compte existe déjà avec cette adresse e-mail.",
+    "AUTH_RESET_TOKEN_INVALID": "Ce lien de réinitialisation n'est pas valide.",
+    "AUTH_RESET_TOKEN_EXPIRED": "Ce lien de réinitialisation a expiré. Demandez-en un nouveau.",
+    "ACCOUNT_DELETION_BLOCKED_ACTIVE_SUBSCRIPTION": "Résiliez votre abonnement payant avant de supprimer votre compte.",
+    "IMPORT_FILE_INVALID": "Nous n'avons pas pu lire ce fichier. Vérifiez qu'il s'agit d'un relevé CSV ou PDF.",
+    "IMPORT_FILE_TOO_LARGE": "Ce fichier est trop volumineux.",
+    "IMPORT_FILE_TOO_MANY_ROWS": "Ce fichier comporte trop de lignes.",
+    "IMPORT_FILE_TOO_MANY_PAGES": "Ce PDF comporte trop de pages.",
+    "IMPORT_DELIMITER_AMBIGUOUS": "Nous n'avons pas pu déterminer le séparateur de votre fichier. Choisissez-le.",
+    "IMPORT_MAPPING_REQUIRED": "Indiquez quelles colonnes contiennent la date, le libellé et le montant.",
+    "IMPORT_PREVIEW_EXPIRED": "Cet aperçu a expiré. Relancez l'import du fichier.",
+    "IMPORT_BATCH_ALREADY_ROLLED_BACK": "Cet import a déjà été annulé.",
+    "IMPORT_PDF_REQUIRES_PLUS": "L'import PDF fait partie de l'offre Plus au-delà de l'essai gratuit.",
+    "IMPORT_QUOTA_REACHED": "Vous avez atteint la limite d'imports de l'offre Free ce mois-ci.",
+    "unknown": "Un problème est survenu. Réessayez.",
+    "ADMIN_FORBIDDEN": "Cet espace est réservé à l’administration.",
+    "AI_QUOTA_EXCEEDED": "Vous avez utilisé tous vos crédits IA de ce mois-ci.",
+    "AI_UNAVAILABLE": "L’assistant est indisponible pour le moment. Tout le reste fonctionne normalement.",
+    "BILLING_PRODUCT_UNKNOWN": "Cette offre est indisponible. Réessayez depuis l’écran d’abonnement.",
+    "BILLING_VERIFICATION_FAILED": "Le store n’a pas confirmé cet achat. Rien ne vous a été facturé par nous.",
+    "BILLING_PURCHASE_ALREADY_LINKED": "Cet achat est déjà rattaché à un autre compte.",
+    "BILLING_STORE_UNAVAILABLE": "Le store est injoignable. Réessayez dans quelques minutes.",
+    "WEBHOOK_SIGNATURE_INVALID": "Requête non authentifiée."
+  },
+  "rows": {
+    "CSV_MISSING_DATE": "Date absente",
+    "CSV_INVALID_DATE": "Date illisible",
+    "CSV_MISSING_DESCRIPTION": "Libellé absent",
+    "CSV_MISSING_AMOUNT": "Montant absent",
+    "CSV_INVALID_AMOUNT": "Montant illisible",
+    "CSV_AMBIGUOUS_DATE": "Date ambiguë — confirmez comment la lire",
+    "CSV_INVALID_CURRENCY": "Devise non supportée",
+    "CSV_DUPLICATE": "Doublon possible",
+    "CSV_REFUND": "Remboursement — exclu des dépenses",
+    "PDF_LOW_CONFIDENCE_LINE": "Lue avec une confiance faible — à vérifier"
+  },
+  "a11y": {
+    "kpiCard": "{{label}} : {{value}} pour {{period}}",
+    "chartBar": "{{month}} : {{value}}",
+    "chartSummary": "Graphique des dépenses sur les {{count}} derniers mois",
+    "languageSelector": "Choisir la langue de l'application",
+    "loading": "Chargement en cours"
+  },
+  "ai": {
+    "title": "Assistant",
+    "subtitle": "Trois usages fixes, construits à partir de chiffres déjà calculés par l’application. Aucun chat libre, aucune question ouverte.",
+    "pending": "Rédaction…",
+    "quota": "{{count}} crédits restants ce mois-ci",
+    "degraded": "Réponse standard",
+    "disclaimer": "L’assistant met en phrase des chiffres existants. Ce n’est pas un conseil financier, et il ne modifie jamais vos données.",
+    "tasks": {
+      "MONTHLY_SUMMARY": "Résumer mon mois",
+      "EXPLAIN_INCREASE": "Expliquer ma hausse",
+      "RECOMMENDATION": "Une recommandation"
+    },
+    "uncertainty": {
+      "label": "Fiabilité",
+      "NONE": "Certaine",
+      "LOW": "Élevée",
+      "MEDIUM": "Moyenne",
+      "HIGH": "Faible"
+    }
+  }
+}

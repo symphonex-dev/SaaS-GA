@@ -1,0 +1,105 @@
+/**
+ * Feuille de style des pages publiques légales.
+ *
+ * Volontairement minimale et sans dépendance : ces pages sont du texte
+ * statique traduit, lisible sans JavaScript. Le style de l'application, lui,
+ * vit dans `apps/mobile` (NativeWind).
+ *
+ * Mobile-first, unités relatives uniquement : les stores consultent ces pages
+ * depuis un téléphone.
+ */
+:root {
+  --ink: #111827;
+  --ink-muted: #4b5563;
+  --surface: #ffffff;
+  --surface-muted: #f9fafb;
+  --border: #e5e7eb;
+  --brand: #1d4ed8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #f9fafb;
+    --ink-muted: #d1d5db;
+    --surface: #111827;
+    --surface-muted: #0b1220;
+    --border: #374151;
+    --brand: #93c5fd;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--surface-muted);
+  color: var(--ink);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  /* Taille relative : le réglage d'accessibilité du navigateur est respecté. */
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+h1 {
+  font-size: 1.75rem;
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+p,
+li {
+  color: var(--ink-muted);
+}
+
+ul {
+  padding-left: 1.25rem;
+}
+
+a {
+  color: var(--brand);
+}
+
+header,
+footer {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.updated {
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
