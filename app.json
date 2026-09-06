@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "314df691-ffd9-4392-9e19-bc4e9a4b5807"
+      }
+    },
+    "android": {
+      "package": "com.whiteproject0707.subscriptionmanager"
+    }
+  }
+}
