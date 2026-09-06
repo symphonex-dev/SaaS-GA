@@ -10,6 +10,13 @@ build/
 .expo/
 *.tsbuildinfo
 
+# Projets natifs — sortie de `expo prebuild`, régénérée à chaque build EAS à
+# partir de `app.config.ts` (CNG). Les conserver dans le dépôt fait sauter
+# l'étape de prebuild : la configuration native se fige et toute modification
+# ultérieure de `app.config.ts` est silencieusement ignorée (CLAUDE.md §10.12).
+apps/mobile/android/
+apps/mobile/ios/
+
 # Prisma
 apps/api/prisma/*.db
 apps/api/prisma/*.db-journal

@@ -37,6 +37,17 @@ const config: ExpoConfig = {
   slug: 'subscription-manager',
   scheme: 'subscription-manager',
   version: '0.1.0',
+  updates: {
+    url: 'https://u.expo.dev/314df691-ffd9-4392-9e19-bc4e9a4b5807',
+  },
+  // Une seule politique, pour les deux plateformes : une mise à jour EAS n'est
+  // servie qu'à un binaire dont le `runtimeVersion` correspond exactement. Deux
+  // valeurs différentes — `'1.0.0'` en dur sur Android contre `appVersion`
+  // (= `version`) sur iOS — produisent deux binaires qui ne reçoivent jamais la
+  // même mise à jour, sans qu'aucune erreur ne le signale.
+  runtimeVersion: {
+    policy: 'appVersion',
+  },
   orientation: 'portrait',
   userInterfaceStyle: 'automatic',
   icon: './assets/icon.png',
@@ -81,6 +92,9 @@ const config: ExpoConfig = {
     // gagnerait sur la détection automatique et rendrait l'API injoignable
     // depuis un téléphone physique, pour qui `localhost` désigne le téléphone.
     ...(apiBaseUrl.length > 0 ? { apiBaseUrl } : {}),
+    eas: {
+      projectId: '314df691-ffd9-4392-9e19-bc4e9a4b5807',
+    },
   },
 };
 

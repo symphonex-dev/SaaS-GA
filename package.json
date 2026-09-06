@@ -21,6 +21,7 @@
     "dev:api": "npm run dev --workspace=apps/api",
     "dev:api:lan": "npm run dev:lan --workspace=apps/api",
     "dev:mobile": "npm run start --workspace=apps/mobile",
+    "dev:mobile:go": "npm run start:go --workspace=apps/mobile",
     "db:generate": "npm run db:generate --workspace=apps/api",
     "db:migrate": "npm run db:migrate --workspace=apps/api",
     "db:migrate:deploy": "npm run db:migrate:deploy --workspace=apps/api",

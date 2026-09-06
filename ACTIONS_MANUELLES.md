@@ -55,11 +55,16 @@ Expo Go n'embarque que les modules natifs du SDK. Le reste de l'application y fo
 **Seul l'achat in-app** exige un build natif : `expo-iap` n'existe pas dans Expo Go. L'écran d'offres reste consultable et l'annonce explicitement ; aucun repli ne simule un achat.
 
 ```bash
-npx expo install expo-dev-client        # à ajouter au moment de préparer le build
-eas build --profile development --platform android
+npx eas build --profile development --platform android
 ```
 
-`expo-dev-client` n'est **volontairement pas** dans les dépendances : l'installer bascule `expo start` en mode development build par défaut, ce qui gênerait la recette quotidienne dans Expo Go.
+`expo-dev-client` **doit rester déclaré dans `apps/mobile/package.json`** — c'est ce qui embarque le lanceur de développement dans l'APK. L'autolinking d'Expo part des dépendances du projet Expo : installé ailleurs (à la racine du monorepo, par exemple), le paquet est présent dans `node_modules` mais n'est **pas lié**, et l'APK démarre sans écran de sélection de serveur, se fige, puis déclenche un ANR. Un test structurel garde cette déclaration (`CLAUDE.md` §10.12).
+
+Effet de bord assumé : avec `expo-dev-client` installé, `npm run dev:mobile` démarre en mode development build. La recette quotidienne dans Expo Go reste accessible d'une option :
+
+```bash
+npm run dev:mobile:go     # expo start --go, depuis la racine du monorepo
+```
 
 Avant le build, renseigner les identifiants de produits dans `apps/mobile/.env` (voir `apps/mobile/.env.example`). Les secrets de vérification, eux, restent exclusivement côté serveur (§3 et §4 ci-dessous).
 

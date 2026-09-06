@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import appConfig from '../app.config';
 import en from '../locales/en.json';
 import es from '../locales/es.json';
 import fr from '../locales/fr.json';
@@ -245,5 +246,100 @@ describe('modules natifs et Expo Go', () => {
     const manifest = fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8');
 
     expect(manifest).not.toContain('react-native-purchases');
+  });
+});
+
+/**
+ * Build de développement Android (CLAUDE.md §10.12).
+ *
+ * Ces quatre invariants sont ceux dont la rupture produit un APK qui se fige
+ * sur l'écran de démarrage puis déclenche un ANR, **sans aucune erreur de
+ * build** : l'APK se construit normalement, il lui manque simplement le
+ * lanceur de développement.
+ */
+describe('build de développement Android', () => {
+  interface MobileManifest {
+    dependencies?: Record<string, string>;
+  }
+
+  interface BuildProfile {
+    extends?: string;
+    env?: Record<string, string>;
+    developmentClient?: boolean;
+  }
+
+  function mobileManifest(): MobileManifest {
+    return JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')) as MobileManifest;
+  }
+
+  function buildProfiles(): Record<string, BuildProfile> {
+    const easJson = JSON.parse(fs.readFileSync(path.join(ROOT, 'eas.json'), 'utf8')) as {
+      build?: Record<string, BuildProfile>;
+    };
+
+    return easJson.build ?? {};
+  }
+
+  /** Applique la chaîne `extends` d'un profil EAS, comme le fait EAS Build. */
+  function resolvedEnv(profileName: string): Record<string, string> {
+    const profiles = buildProfiles();
+    const chain: BuildProfile[] = [];
+    let name: string | undefined = profileName;
+
+    while (name !== undefined) {
+      const profile: BuildProfile | undefined = profiles[name];
+
+      if (profile === undefined) {
+        break;
+      }
+
+      chain.unshift(profile);
+      name = profile.extends;
+    }
+
+    return chain.reduce<Record<string, string>>((env, profile) => ({ ...env, ...profile.env }), {});
+  }
+
+  it('déclare `expo-dev-client` dans les dépendances de l’application', () => {
+    // L'autolinking d'Expo part des dépendances **du projet Expo**, pas de ce
+    // qui traîne dans `node_modules`. Déclaré au seul niveau du monorepo, le
+    // paquet est bien installé mais ni `expo-dev-launcher` ni `expo-dev-menu`
+    // ne sont liés : l'APK `developmentClient: true` démarre alors sans écran
+    // de sélection de serveur, donc sans aucun moyen d'atteindre Metro.
+    expect(mobileManifest().dependencies?.['expo-dev-client']).toBeDefined();
+  });
+
+  it('ne committe aucun projet natif : le prebuild s’exécute à chaque build', () => {
+    // Un dossier `android/` ou `ios/` présent fait sauter `expo prebuild` côté
+    // EAS. La configuration native se fige à la date du dernier prebuild local
+    // et toute modification ultérieure de `app.config.ts` — plugin, icône,
+    // permission, dépendance native — est silencieusement ignorée.
+    for (const directory of ['android', 'ios']) {
+      expect(`${directory}:${String(fs.existsSync(path.join(ROOT, directory)))}`).toBe(
+        `${directory}:false`,
+      );
+    }
+  });
+
+  it('ne fige pas l’URL d’API dans le profil de développement', () => {
+    const development = buildProfiles()['development'];
+
+    expect(development?.developmentClient).toBe(true);
+    // `EXPO_PUBLIC_API_BASE_URL` gagne sur toute déduction (`lib/api-config.ts`).
+    // Fixée ici — y compris héritée d'un profil parent — elle enverrait le build
+    // de développement vers une URL figée au lieu de la machine de l'hôte Metro.
+    expect(resolvedEnv('development')['EXPO_PUBLIC_API_BASE_URL']).toBeUndefined();
+  });
+
+  it('n’écrit jamais d’adresse de boucle locale dans la configuration Expo', () => {
+    // `extra` est inliné dans le bundle : une adresse de boucle locale y
+    // désignerait le téléphone lui-même, jamais la machine de développement.
+    expect(JSON.stringify(appConfig)).not.toMatch(/localhost|127\.0\.0\.1|10\.0\.2\.2/);
+  });
+
+  it('n’a qu’une seule politique de `runtimeVersion`, commune aux plateformes', () => {
+    expect(appConfig.runtimeVersion).toEqual({ policy: 'appVersion' });
+    expect(appConfig.android?.runtimeVersion).toBeUndefined();
+    expect(appConfig.ios?.runtimeVersion).toBeUndefined();
   });
 });

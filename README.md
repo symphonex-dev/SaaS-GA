@@ -85,9 +85,9 @@ npm run dev:mobile     # Expo (choisir ensuite Android / iOS)
 |---|---|---|
 | Navigateur / simulateur iOS | l'ordinateur | `http://localhost:3000` |
 | Émulateur Android | l'émulateur | `http://10.0.2.2:3000` |
-| **Téléphone physique (Expo Go)** | **le téléphone** | `http://<IP LAN de l'ordinateur>:3000` |
+| **Téléphone physique (Expo Go ou build de développement)** | **le téléphone** | `http://<IP LAN de l'ordinateur>:3000` |
 
-Sur un téléphone physique, l'adresse LAN n'est **jamais codée en dur** : elle est déduite de l'hôte Metro auquel Expo Go est déjà connecté. Il faut alors que Next.js écoute sur l'interface réseau, et pas seulement sur la boucle locale :
+Sur un téléphone physique, l'adresse LAN n'est **jamais codée en dur** : elle est déduite de l'hôte Metro auquel l'application est déjà connectée. Il faut alors que Next.js écoute sur l'interface réseau, et pas seulement sur la boucle locale :
 
 ```bash
 npm run dev:api:lan    # next dev --hostname 0.0.0.0
@@ -110,6 +110,30 @@ Une URL d'API publique n'est pas un secret. En revanche, **aucune clé ni aucun 
 En développement, une requête en échec écrit un diagnostic dans la console Metro — méthode, URL appelée, code HTTP, cause réseau (DNS / connexion refusée / délai dépassé), plateforme et provenance de l'URL configurée. Il ne contient ni en-tête, ni jeton, ni donnée utilisateur, et n'existe pas en production.
 
 Pour dérouler le parcours « mot de passe oublié » en local, mettre `EMAIL_PROVIDER="console"` : le lien de réinitialisation est écrit dans la sortie standard de l'API. Ce transport est refusé en production — le lien contient le token brut.
+
+### Build de développement (modules natifs absents d'Expo Go)
+
+Expo Go n'embarque que les modules natifs du SDK. `expo-iap` n'en fait pas partie : l'achat in-app exige un **build de développement**, un APK qui contient les modules natifs du projet et charge le JavaScript depuis Metro.
+
+```bash
+npx eas build --profile development --platform android
+```
+
+Deux règles rendent cet APK utilisable ; leur rupture produit un APK qui se construit sans erreur mais se fige au démarrage :
+
+- **`expo-dev-client` doit être déclaré dans `apps/mobile/package.json`.** L'autolinking d'Expo part des dépendances du projet Expo, pas de ce qui traîne dans `node_modules` : déclaré au seul niveau du monorepo, le paquet est installé mais `expo-dev-launcher` n'est pas lié, et l'APK démarre sans écran de sélection de serveur.
+- **Aucun dossier `android/` ni `ios/` ne doit être committé.** Ils sont régénérés par `expo prebuild` à chaque build EAS à partir de `app.config.ts`. Présents dans le dépôt, ils font sauter cette étape : la configuration native se fige et toute modification ultérieure de `app.config.ts` est silencieusement ignorée.
+
+Les deux sont vérifiées par `apps/mobile/tests/structure.test.ts`.
+
+Le profil `development` ne fixe volontairement **pas** `EXPO_PUBLIC_API_BASE_URL` : sans elle, l'application déduit l'adresse de l'API de l'hôte Metro, exactement comme dans Expo Go. Connexion :
+
+```bash
+npm run dev:api:lan    # l'API doit écouter sur l'interface réseau
+npm run dev:mobile     # Metro affiche une URL exp://<IP LAN>:8081
+```
+
+Ouvrir ensuite l'application installée : elle affiche l'écran du *development launcher*, sur lequel « Scan QR code » ou « Enter URL manually » permet de rejoindre Metro. Une secousse du téléphone rouvre ce menu à tout moment.
 
 ---
 
@@ -150,7 +174,8 @@ Toutes se lancent depuis la racine et s'appliquent aux trois workspaces.
 | `npm run format` / `npm run format:check` | Prettier |
 | `npm run test` | Vitest — suites de `apps/api` et de `apps/mobile` |
 | `npm run dev:api` / `dev:api:lan` | API sur la boucle locale / sur l'interface réseau |
-| `npm run dev:mobile` | Serveur Expo |
+| `npm run dev:mobile` | Serveur Expo (mode build de développement) |
+| `npm run dev:mobile:go` | Serveur Expo forcé sur Expo Go (`expo start --go`) |
 | `npm run build` | Build de production de `apps/api` |
 | `npm run db:generate` | `prisma generate` |
 | `npm run db:migrate` | `prisma migrate dev` (développement) |
