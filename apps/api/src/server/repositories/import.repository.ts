@@ -26,6 +26,22 @@ export interface ExpenseToCreate {
   paymentMethod: Prisma.ExpenseCreateManyInput['paymentMethod'];
 }
 
+/**
+ * Durée maximale de la transaction d'insertion d'un lot.
+ *
+ * Prisma coupe une transaction interactive au bout de 5 secondes par défaut,
+ * ce qui est court pour un relevé volumineux : chaque dépense est insérée par
+ * un aller-retour distinct, donc le temps de la transaction croît avec le
+ * nombre de lignes. Un import interrompu à mi-chemin est intégralement annulé
+ * (§2), l'utilisateur perd donc tout son import pour une raison qui n'a rien
+ * à voir avec son fichier.
+ *
+ * 30 secondes laissent de la marge pour les gros PDF de production sans
+ * renoncer au garde-fou : une transaction réellement bloquée finit malgré tout
+ * par rendre la main plutôt que de retenir une connexion indéfiniment.
+ */
+const CREATE_BATCH_TRANSACTION_TIMEOUT_MS = 30_000;
+
 export const importRepository = {
   /**
    * Crée le lot et ses dépenses dans une seule transaction : soit l'import
@@ -36,38 +52,41 @@ export const importRepository = {
     batch: { sourceType: ImportSourceType; filename: string | null } & ImportBatchCounts,
     expenses: readonly ExpenseToCreate[],
   ): Promise<ExpenseImportBatch> {
-    return prisma.$transaction(async (tx) => {
-      const created = await tx.expenseImportBatch.create({
-        data: {
-          userId,
-          sourceType: batch.sourceType,
-          filename: batch.filename,
-          rowCount: batch.rowCount,
-          importedCount: batch.importedCount,
-          rejectedCount: batch.rejectedCount,
-          duplicateCount: batch.duplicateCount,
-        },
-      });
-
-      for (const expense of expenses) {
-        await tx.expense.create({
+    return prisma.$transaction(
+      async (tx) => {
+        const created = await tx.expenseImportBatch.create({
           data: {
             userId,
-            importBatchId: created.id,
-            merchantRaw: expense.merchantRaw,
-            merchantNormalized: expense.merchantNormalized,
-            amount: expense.amount,
-            currency: expense.currency,
-            date: expense.date,
-            category: expense.category,
-            paymentMethod: expense.paymentMethod,
-            source: 'IMPORT',
+            sourceType: batch.sourceType,
+            filename: batch.filename,
+            rowCount: batch.rowCount,
+            importedCount: batch.importedCount,
+            rejectedCount: batch.rejectedCount,
+            duplicateCount: batch.duplicateCount,
           },
         });
-      }
 
-      return created;
-    });
+        for (const expense of expenses) {
+          await tx.expense.create({
+            data: {
+              userId,
+              importBatchId: created.id,
+              merchantRaw: expense.merchantRaw,
+              merchantNormalized: expense.merchantNormalized,
+              amount: expense.amount,
+              currency: expense.currency,
+              date: expense.date,
+              category: expense.category,
+              paymentMethod: expense.paymentMethod,
+              source: 'IMPORT',
+            },
+          });
+        }
+
+        return created;
+      },
+      { timeout: CREATE_BATCH_TRANSACTION_TIMEOUT_MS },
+    );
   },
 
   async findBatchForUser(id: string, userId: string): Promise<ExpenseImportBatch | null> {
