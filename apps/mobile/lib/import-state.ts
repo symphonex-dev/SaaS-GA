@@ -37,6 +37,15 @@ export interface PickedFile {
   uri: string;
   name: string;
   mimeType: string;
+  /**
+   * Nature choisie par l'utilisateur à l'écran précédent, et non devinée du
+   * type MIME : certains fournisseurs de documents Android annoncent
+   * `application/octet-stream` pour un PDF parfaitement valide. C'est elle qui
+   * fixe l'extension sous laquelle le fichier est envoyé, et le serveur refuse
+   * un fichier dont l'extension et le contenu réel ne concordent pas
+   * (`specs/import-releves.md` §11).
+   */
+  source: ImportSource;
 }
 
 /**

@@ -1,4 +1,5 @@
 import type { ApiResponse, ErrorCode } from '@subscription-manager/shared';
+import { Directory, File, Paths, UploadType } from 'expo-file-system';
 import { Platform } from 'react-native';
 
 import { apiBaseUrlResolution } from './api-config';
@@ -32,23 +33,34 @@ export class ApiError extends Error {
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: unknown;
-  /** Corps multipart déjà construit (import de relevé). */
-  formData?: FormData;
   /** `false` pour les routes publiques d'authentification. */
   authenticated?: boolean;
   signal?: AbortSignal;
 }
 
-/** Familles de panne réseau distinguables depuis le client (§4 de la mission). */
+/** Familles de panne distinguables depuis le client (§4 de la mission). */
 export type NetworkFailureKind =
-  'ABORTED' | 'TIMEOUT' | 'DNS' | 'CONNECTION_REFUSED' | 'TLS' | 'UNREACHABLE';
+  'ABORTED' | 'TIMEOUT' | 'DNS' | 'CONNECTION_REFUSED' | 'TLS' | 'FILE_UNREADABLE' | 'UNREACHABLE';
 
 /**
- * Classe une panne réseau à partir du message de `fetch`.
+ * Classe une panne à partir du message de l'erreur.
  *
- * React Native ne fournit pas de code d'erreur structuré : le message brut est
- * la seule information disponible. Il n'est **jamais affiché** à l'utilisateur
- * (§13 : seul le code stable choisit un texte traduit) ni journalisé tel quel.
+ * ⚠️ **Ce que cette fonction peut et ne peut pas voir.** Le `fetch` de React
+ * Native (`whatwg-fetch`) rejette avec un `TypeError: Network request failed`
+ * **quelle que soit** la panne sous-jacente : le message natif d'Android — DNS
+ * introuvable, connexion refusée, trafic en clair interdit — n'atteint jamais
+ * le JavaScript. Sur ce chemin, seuls `ABORTED`, `TIMEOUT` et `UNREACHABLE`
+ * peuvent donc sortir, et `UNREACHABLE` ne veut dire que « panne non
+ * identifiable », jamais « adresse injoignable ».
+ *
+ * Les autres familles ne sont atteignables que depuis un appel qui **conserve**
+ * le message natif — aujourd'hui l'envoi de fichier (`apiUpload`), qui passe
+ * par `expo-file-system`. C'est précisément pourquoi il ne repose pas sur
+ * `fetch`.
+ *
+ * Le message brut n'est **jamais affiché** à l'utilisateur (§13 : seul le code
+ * stable choisit un texte traduit) ni journalisé sans passer par
+ * `redactDiagnosticDetail`.
  */
 export function classifyNetworkFailure(error: unknown): NetworkFailureKind {
   if (error instanceof Error && error.name === 'AbortError') {
@@ -70,7 +82,13 @@ export function classifyNetworkFailure(error: unknown): NetworkFailureKind {
     return 'DNS';
   }
 
-  if (message.includes('connection refused') || message.includes('econnrefused')) {
+  // « Failed to connect to /192.168.1.136:3000 » est la formulation d'OkHttp
+  // aussi bien pour un refus que pour un hôte injoignable.
+  if (
+    message.includes('connection refused') ||
+    message.includes('econnrefused') ||
+    message.includes('failed to connect')
+  ) {
     return 'CONNECTION_REFUSED';
   }
 
@@ -83,7 +101,37 @@ export function classifyNetworkFailure(error: unknown): NetworkFailureKind {
     return 'TLS';
   }
 
+  if (
+    message.includes('no such file') ||
+    message.includes('does not exist') ||
+    message.includes('enoent') ||
+    message.includes('unabletoread') ||
+    message.includes('permission denied')
+  ) {
+    return 'FILE_UNREADABLE';
+  }
+
   return 'UNREACHABLE';
+}
+
+/**
+ * Message natif d'une panne, débarrassé de ce qui pourrait identifier
+ * l'utilisateur ou son relevé.
+ *
+ * Le nom d'un relevé bancaire est une donnée personnelle : il n'a rien à faire
+ * dans un journal, même de développement (CLAUDE.md §6). Seules la nature de
+ * la panne et l'adresse appelée sont conservées — l'adresse de l'API est déjà
+ * journalisée à part, et une adresse IP de réseau local n'identifie personne.
+ */
+export function redactDiagnosticDetail(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return 'erreur non standard';
+  }
+
+  return error.message
+    .replace(/file:\/\/\S*/gi, '<fichier masqué>')
+    .replace(/(?:\/[\w.%-]+){2,}/g, '<chemin masqué>')
+    .slice(0, 200);
 }
 
 /**
@@ -103,6 +151,8 @@ export function logNetworkDiagnostic(entry: {
   status: number | null;
   failure: NetworkFailureKind | null;
   code?: string;
+  /** Message natif **déjà expurgé** par `redactDiagnosticDetail`. */
+  detail?: string;
 }): void {
   if (!__DEV__) {
     return;
@@ -118,6 +168,7 @@ export function logNetworkDiagnostic(entry: {
       `  statut HTTP    : ${entry.status === null ? 'aucune réponse' : String(entry.status)}`,
       `  cause réseau   : ${entry.failure ?? 'réponse reçue'}`,
       `  code applicatif: ${entry.code ?? '—'}`,
+      entry.detail === undefined ? '' : `  message natif  : ${entry.detail}`,
       `  plateforme     : ${Platform.OS} ${String(Platform.Version)}`,
       `  API configurée : ${baseUrl} (source : ${source})`,
       entry.failure === null
@@ -139,22 +190,47 @@ function deviceLabel(): string {
   return encodeURIComponent(`${Platform.OS} — ${String(Platform.Version)}`);
 }
 
-async function buildHeaders(options: RequestOptions): Promise<Headers> {
-  const headers = new Headers({ accept: 'application/json', 'x-device-label': deviceLabel() });
+async function buildHeaders(options: RequestOptions): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {
+    accept: 'application/json',
+    'x-device-label': deviceLabel(),
+  };
 
   if (options.body !== undefined) {
-    headers.set('content-type', 'application/json');
+    headers['content-type'] = 'application/json';
   }
 
   if (options.authenticated !== false) {
     const token = await readSessionToken();
 
     if (token !== null) {
-      headers.set('authorization', `Bearer ${token}`);
+      headers['authorization'] = `Bearer ${token}`;
     }
   }
 
   return headers;
+}
+
+/**
+ * Déballe l'enveloppe `{ success, data }` (`specs/auth-comptes-rgpd.md` §7).
+ *
+ * Partagé par les deux chemins de sortie — requête JSON et envoi de fichier —
+ * pour qu'ils produisent exactement la même `ApiError` à partir du même code
+ * serveur. Le message brut du serveur n'est jamais affiché (§13).
+ */
+function unwrapApiPayload<T>(
+  payload: ApiResponse<T>,
+  status: number,
+  method: string,
+  url: string,
+): T {
+  if (!payload.success) {
+    logNetworkDiagnostic({ method, url, status, failure: null, code: payload.error.code });
+
+    throw new ApiError(payload.error.code, payload.error.message, status, payload.error.field);
+  }
+
+  return payload.data;
 }
 
 /**
@@ -175,8 +251,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     response = await fetch(url, {
       method,
       headers: await buildHeaders(options),
-      body:
-        options.formData ?? (options.body === undefined ? undefined : JSON.stringify(options.body)),
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
       ...(options.signal === undefined ? {} : { signal: options.signal }),
     });
   } catch (error) {
@@ -209,27 +284,136 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
 
   const payload = (await response.json()) as ApiResponse<T>;
 
-  if (!payload.success) {
-    logNetworkDiagnostic({
-      method,
-      url,
-      status: response.status,
-      failure: null,
-      code: payload.error.code,
-    });
-
-    throw new ApiError(
-      payload.error.code,
-      payload.error.message,
-      response.status,
-      payload.error.field,
-    );
-  }
-
-  return payload.data;
+  return unwrapApiPayload(payload, response.status, method, url);
 }
 
-/** Requête multipart (import de relevé) : le corps est déjà encodé. */
-export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
-  return apiRequest<T>(path, { method: 'POST', formData });
+/** Fichier à envoyer, déjà nommé avec l'extension que le serveur doit lire. */
+export interface UploadFile {
+  /** URI locale `file://` renvoyée par le sélecteur de documents. */
+  uri: string;
+  /** Nom **et extension** sous lesquels le fichier part (`importUploadFileName`). */
+  uploadName: string;
+  mimeType: string;
+}
+
+/**
+ * Répertoire de transit, à l'intérieur du cache de l'application.
+ *
+ * Le fichier choisi y est recopié sous un nom correct juste avant l'envoi,
+ * puis supprimé — un relevé bancaire n'a pas à séjourner en clair dans le
+ * cache (CLAUDE.md §6 : minimisation).
+ */
+const UPLOAD_STAGING_DIRECTORY = 'statement-uploads';
+
+/**
+ * Envoi d'un fichier en `multipart/form-data`.
+ *
+ * ## Pourquoi pas `fetch` + `FormData`
+ *
+ * React Native sait envoyer un `FormData` contenant `{ uri, name, type }`,
+ * mais ce chemin s'est révélé être le seul à échouer sur appareil physique
+ * alors que toutes les autres requêtes passaient. Il a deux propriétés qui le
+ * rendent impossible à diagnostiquer :
+ *
+ * - le corps est construit **avant** l'ouverture de la moindre connexion
+ *   (`NetworkingModule.constructMultipartBody`), et le moindre incident —
+ *   fichier illisible, type MIME non analysable — interrompt la requête sans
+ *   qu'aucun octet ne parte : le serveur reste muet, l'échec est instantané ;
+ * - `whatwg-fetch`, le `fetch` de React Native, remplace **toute** erreur
+ *   native par `TypeError: Network request failed`. Le message réel n'atteint
+ *   jamais le JavaScript, donc aucune classification n'est possible.
+ *
+ * `expo-file-system` envoie le fichier depuis un `File` natif : la longueur du
+ * corps est connue, aucun flux n'est relu, et surtout **l'erreur native
+ * remonte telle quelle**. Un échec devient lisible au lieu d'être un
+ * `NETWORK_ERROR` muet.
+ *
+ * Le module est déjà lié à l'application : aucun nouveau build natif n'est
+ * nécessaire.
+ */
+export async function apiUpload<T>(
+  path: string,
+  file: UploadFile,
+  parameters: Record<string, string> = {},
+): Promise<T> {
+  const url = `${apiBaseUrlResolution().baseUrl}${path}`;
+  const headers = await buildHeaders({ method: 'POST' });
+
+  let staged: File;
+
+  try {
+    const directory = new Directory(Paths.cache, UPLOAD_STAGING_DIRECTORY);
+
+    directory.create({ intermediates: true, idempotent: true });
+    staged = new File(directory, file.uploadName);
+
+    await new File(file.uri).copy(staged, { overwrite: true });
+  } catch (error) {
+    // Le fichier choisi n'est plus lisible : ce n'est pas une panne réseau, et
+    // l'annoncer comme telle enverrait l'utilisateur vérifier son Wi-Fi.
+    logNetworkDiagnostic({
+      method: 'POST',
+      url,
+      status: null,
+      failure: 'FILE_UNREADABLE',
+      code: 'IMPORT_FILE_INVALID',
+      detail: redactDiagnosticDetail(error),
+    });
+
+    throw new ApiError('IMPORT_FILE_INVALID', 'Local file unreadable', 0, 'file');
+  }
+
+  try {
+    const result = await staged.upload(url, {
+      httpMethod: 'POST',
+      uploadType: UploadType.MULTIPART,
+      fieldName: 'file',
+      mimeType: file.mimeType,
+      parameters,
+      headers,
+    });
+
+    let payload: ApiResponse<T>;
+
+    try {
+      payload = JSON.parse(result.body) as ApiResponse<T>;
+    } catch {
+      logNetworkDiagnostic({
+        method: 'POST',
+        url,
+        status: result.status,
+        failure: null,
+        code: 'INTERNAL_ERROR',
+      });
+
+      throw new ApiError('INTERNAL_ERROR', 'Unexpected response', result.status);
+    }
+
+    return unwrapApiPayload(payload, result.status, 'POST', url);
+  } catch (error) {
+    // Une réponse d'erreur du serveur est déjà une `ApiError` portant son code.
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
+    const failure = classifyNetworkFailure(error);
+
+    logNetworkDiagnostic({
+      method: 'POST',
+      url,
+      status: null,
+      failure,
+      code: 'NETWORK_ERROR',
+      detail: redactDiagnosticDetail(error),
+    });
+
+    throw new ApiError('NETWORK_ERROR', 'Network request failed', 0);
+  } finally {
+    try {
+      staged.delete();
+    } catch {
+      // Le cache est de toute façon purgé par le système ; échouer ici
+      // masquerait le résultat réel de l'envoi.
+    }
+  }
 }

@@ -236,6 +236,20 @@ describe('modules natifs et Expo Go', () => {
     expect(module).toContain("require('expo-iap')");
   });
 
+  it('déclare tout module natif qu’il importe', () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')) as {
+      dependencies?: Record<string, string>;
+    };
+
+    // L'autolinking d'Expo part des dépendances **du projet Expo**. Un module
+    // seulement hissé dans `node_modules` est importable en développement et
+    // absent du binaire : la panne n'apparaît qu'à l'exécution sur l'appareil
+    // (CLAUDE.md §10.12).
+    for (const module of ['expo-document-picker', 'expo-file-system', 'expo-secure-store']) {
+      expect(Object.keys(manifest.dependencies ?? {})).toContain(module);
+    }
+  });
+
   it('n’utilise plus RevenueCat : la facturation est directe (Google/Apple)', () => {
     const offenders = readAll()
       .filter(({ content }) => /react-native-purchases|revenuecat/i.test(content))

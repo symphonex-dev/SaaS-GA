@@ -154,7 +154,9 @@ describe('assistant IA borné', () => {
 
       expect(call.options.method).toBe('POST');
       expect(call.options.body).toBeUndefined();
-      expect(call.options.formData).toBeUndefined();
+      // Rien d'autre que la méthode : aucun corps, aucune pièce jointe, aucun
+      // contexte. Le serveur construit lui-même les faits soumis au modèle.
+      expect(Object.keys(call.options)).toEqual(['method']);
     }
   });
 

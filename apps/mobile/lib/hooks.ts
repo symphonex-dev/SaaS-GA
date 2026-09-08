@@ -50,7 +50,8 @@ import {
   verifyPurchaseCall,
   type AiTaskKey,
 } from './api-endpoints';
-import { buildImportFormData } from './import-upload';
+import type { ImportSource } from './import-state';
+import { buildImportUploadParameters, importUploadFileName } from './import-upload';
 import { queryKeys } from './query-client';
 
 /**
@@ -218,6 +219,7 @@ export interface ImportPreviewVariables {
   uri: string;
   name: string;
   mimeType: string;
+  source: ImportSource;
   delimiter?: string;
   dateOrder?: 'DMY' | 'MDY';
   mapping?: { dateColumn: number; descriptionColumn: number; amountColumn: number };
@@ -228,6 +230,10 @@ export interface ImportPreviewVariables {
  *
  * Le fichier part en `multipart/form-data` ; le serveur l'analyse et le
  * supprime immédiatement. Aucun parsing n'a lieu ici.
+ *
+ * Le nom d'envoi est reconstruit à partir de la nature choisie par
+ * l'utilisateur : la copie déposée par le sélecteur de documents porte un nom
+ * sans extension, que le contrôle serveur refuse (`importUploadFileName`).
  */
 export function useImportPreview(): UseMutationResult<
   ImportPreviewDto,
@@ -238,7 +244,12 @@ export function useImportPreview(): UseMutationResult<
     mutationFn: (variables: ImportPreviewVariables) =>
       apiUpload<ImportPreviewDto>(
         '/api/imports/preview',
-        buildImportFormData(variables, {
+        {
+          uri: variables.uri,
+          uploadName: importUploadFileName(variables.name, variables.source),
+          mimeType: variables.mimeType,
+        },
+        buildImportUploadParameters({
           delimiter: variables.delimiter,
           dateOrder: variables.dateOrder,
           mapping: variables.mapping,

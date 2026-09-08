@@ -6,14 +6,16 @@ import { defineConfig } from 'vitest/config';
  * Suite de tests de `apps/mobile`.
  *
  * Ces tests exercent la **logique pure** du client : résolution de l'URL d'API,
- * garde de navigation, transcription des montants saisis, construction du corps
- * multipart, descripteurs d'appels d'API et parcours d'achat. Ils ne rendent
- * aucun composant : `react-native` n'est pas exécutable hors d'un appareil, et
- * un rendu simulé ne prouverait rien de plus sur ces règles.
+ * garde de navigation, transcription des montants saisis, préparation de
+ * l'envoi d'un relevé, descripteurs d'appels d'API et parcours d'achat. Ils ne
+ * rendent aucun composant : `react-native` n'est pas exécutable hors d'un
+ * appareil, et un rendu simulé ne prouverait rien de plus sur ces règles.
  *
  * Les modules natifs consommés par ces fichiers (`react-native`,
- * `expo-constants`, `expo-iap`) sont remplacés par des doubles
- * minimalistes : le code testé reste le code de production.
+ * `expo-constants`, `expo-secure-store`, `expo-file-system`, `expo-iap`) sont
+ * remplacés par des doubles minimalistes : le code testé reste le code de
+ * production. Le transfert de fichier lui-même n'est donc **pas** couvert ici —
+ * il relève de la recette sur appareil.
  *
  * Ce que ces tests **ne remplacent pas** : la recette sur appareil (tailles
  * d'écran, dynamic type, VoiceOver/TalkBack, liens profonds réels) et le bac à
@@ -25,6 +27,7 @@ export default defineConfig({
       'react-native': path.resolve(__dirname, 'tests/stubs/react-native.ts'),
       'expo-constants': path.resolve(__dirname, 'tests/stubs/expo-constants.ts'),
       'expo-secure-store': path.resolve(__dirname, 'tests/stubs/expo-secure-store.ts'),
+      'expo-file-system': path.resolve(__dirname, 'tests/stubs/expo-file-system.ts'),
       'expo-iap': path.resolve(__dirname, 'tests/stubs/expo-iap.ts'),
     },
   },

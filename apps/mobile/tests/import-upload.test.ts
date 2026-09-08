@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   CSV_MIME_TYPES,
   PDF_MIME_TYPE,
-  buildImportFormData,
+  buildImportUploadParameters,
+  importUploadFileName,
   resolveMimeType,
 } from '../lib/import-upload';
 import {
@@ -20,68 +21,80 @@ import type { ImportPreviewDto } from '@subscription-manager/shared';
  * Aucun parsing métier n'est testé ici : il n'y en a aucun côté mobile. Le
  * fichier part tel quel, et le serveur revalide tout (CLAUDE.md §5.1 et §5.4).
  */
-const file = { uri: 'file:///cache/releve.csv', name: 'releve.csv', mimeType: 'text/csv' };
-
-/**
- * Double de `FormData` reproduisant le comportement de React Native : la valeur
- * `{ uri, name, type }` est **conservée telle quelle**, alors que
- * l'implémentation de Node la convertirait en `'[object Object]'`. C'est le
- * moteur natif qui lit l'URI au moment de l'envoi.
- */
-function recordingFormData(): { form: FormData; entries: Record<string, unknown> } {
-  const entries: Record<string, unknown> = {};
-  const form = {
-    append(key: string, value: unknown): void {
-      entries[key] = value;
-    },
-  } as unknown as FormData;
-
-  return { form, entries };
-}
-
-function entriesOf(
-  file: Parameters<typeof buildImportFormData>[0],
-  options?: Parameters<typeof buildImportFormData>[1],
-): Record<string, unknown> {
-  const { form, entries } = recordingFormData();
-
-  buildImportFormData(file, options ?? {}, form);
-
-  return entries;
-}
-
-describe('corps multipart', () => {
-  it('transporte le fichier sous la forme attendue par React Native', () => {
-    const entry = entriesOf(file)['file'];
-
-    expect(entry).toEqual({
-      uri: 'file:///cache/releve.csv',
-      name: 'releve.csv',
-      type: 'text/csv',
-    });
-  });
-
+describe('champs accompagnant le fichier', () => {
   it('n’ajoute aucun champ optionnel quand aucun n’est fourni', () => {
-    expect(Object.keys(entriesOf(file))).toEqual(['file']);
+    expect(buildImportUploadParameters()).toEqual({});
   });
 
   it('ajoute le délimiteur, l’ordre de date et la correspondance de colonnes', () => {
-    const entries = entriesOf(file, {
+    const parameters = buildImportUploadParameters({
       delimiter: ';',
       dateOrder: 'DMY',
       mapping: { dateColumn: 0, descriptionColumn: 2, amountColumn: 5 },
     });
 
-    expect(entries['delimiter']).toBe(';');
-    expect(entries['dateOrder']).toBe('DMY');
-    expect(entries['mapping']).toBe('{"dateColumn":0,"descriptionColumn":2,"amountColumn":5}');
+    expect(parameters['delimiter']).toBe(';');
+    expect(parameters['dateOrder']).toBe('DMY');
+    expect(parameters['mapping']).toBe('{"dateColumn":0,"descriptionColumn":2,"amountColumn":5}');
   });
 
-  it('ne transporte aucun contenu de relevé : seulement une URI locale', () => {
-    const serialized = JSON.stringify(entriesOf(file));
+  it('ne transporte que ce que le serveur a explicitement demandé', () => {
+    const parameters = buildImportUploadParameters({ delimiter: ',' });
 
-    expect(serialized).not.toContain('amount');
-    expect(serialized).toContain('file:///cache/releve.csv');
+    // Ni source, ni statut, ni identifiant : le serveur les fixe lui-même.
+    expect(Object.keys(parameters)).toEqual(['delimiter']);
+  });
+});
+
+/**
+ * Nom d'envoi (`importUploadFileName`).
+ *
+ * L'extension n'est pas cosmétique : `resolveSourceType`, côté serveur, en
+ * déduit CSV ou PDF avant même de regarder le contenu. La copie déposée par
+ * `expo-document-picker` s'appelle `<uuid>pdf` — sans point — et serait donc
+ * lue comme un fichier sans extension.
+ */
+describe('nom sous lequel le relevé est envoyé', () => {
+  it('impose l’extension correspondant à la nature choisie', () => {
+    expect(importUploadFileName('releve', 'PDF')).toBe('releve.pdf');
+    expect(importUploadFileName('releve', 'CSV')).toBe('releve.csv');
+  });
+
+  it('remplace l’extension d’origine plutôt que de l’empiler', () => {
+    expect(importUploadFileName('releve.csv', 'PDF')).toBe('releve.pdf');
+  });
+
+  it('donne une extension à la copie sans point du sélecteur Android', () => {
+    expect(importUploadFileName('0c8f2a1b4e7d4f0a9c3b5e6d7a8f9b0cpdf', 'PDF')).toBe(
+      '0c8f2a1b4e7d4f0a9c3b5e6d7a8f9b0cpdf.pdf',
+    );
+  });
+
+  it('replie les accents sans rendre le nom méconnaissable', () => {
+    expect(importUploadFileName('Relevé de compte août.pdf', 'PDF')).toBe(
+      'Releve de compte aout.pdf',
+    );
+  });
+
+  it('ne produit jamais un chemin, seulement un nom de fichier', () => {
+    const name = importUploadFileName('../../etc/passwd.csv', 'CSV');
+
+    expect(name).not.toContain('/');
+    expect(name).not.toContain('\\');
+    expect(name.startsWith('.')).toBe(false);
+    expect(name.endsWith('.csv')).toBe(true);
+  });
+
+  it('retombe sur un nom neutre quand rien d’exploitable ne subsiste', () => {
+    expect(importUploadFileName('統計.pdf', 'PDF')).toBe('statement.pdf');
+    expect(importUploadFileName('   ', 'CSV')).toBe('statement.csv');
+  });
+
+  it('borne la longueur sans perdre l’extension', () => {
+    const name = importUploadFileName(`${'a'.repeat(300)}.pdf`, 'PDF');
+
+    expect(name.endsWith('.pdf')).toBe(true);
+    expect(name.length).toBeLessThanOrEqual(68);
   });
 });
 

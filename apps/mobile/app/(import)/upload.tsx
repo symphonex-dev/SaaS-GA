@@ -61,6 +61,10 @@ export default function Upload(): ReactNode {
         // Certains fournisseurs Android ne renseignent aucun type MIME : le
         // serveur revalide le contenu réel de toute façon.
         mimeType: resolveMimeType(asset.mimeType, isPdf ? 'PDF' : 'CSV'),
+        // La nature vient du choix de l'utilisateur, pas du type MIME : c'est
+        // elle qui fixe l'extension d'envoi, et le serveur exige que celle-ci
+        // concorde avec le contenu réel (`specs/import-releves.md` §11).
+        source: isPdf ? 'PDF' : 'CSV',
       });
     } catch {
       // Sélecteur indisponible ou permission refusée : état explicite, jamais
