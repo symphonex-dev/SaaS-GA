@@ -1,6 +1,7 @@
 import type {
   AiAnswerDto,
   AiQuotaDto,
+  AiStatusDto,
   AuthenticatedSessionDto,
   ComparisonDto,
   CreateExpenseInput,
@@ -595,15 +596,24 @@ export function useDeleteSavingsGoal(): UseMutationResult<{ deleted: boolean }, 
 // Les trois usages autorisés sont définis — et fermés — dans `api-endpoints`.
 export { AI_TASK_ENDPOINTS, type AiTaskKey } from './api-endpoints';
 
-/** Quota mensuel, lu sans consommer de crédit (B.8). */
-export function useAiQuota(): UseQueryResult<AiQuotaDto> {
+/**
+ * Disponibilité de l'assistant et quota mensuel, lus sans consommer de crédit
+ * (B.8). `enabled` est décidé par le serveur (`AI_PROVIDER`) : il ne sert qu'à
+ * ne pas proposer d'usage voué à l'échec.
+ */
+export function useAiStatus(): UseQueryResult<AiStatusDto> {
   return useQuery({
     queryKey: queryKeys.aiQuota,
     queryFn: async () => {
       const call = aiQuotaCall();
-      const data = await apiRequest<{ quota: AiQuotaDto }>(call.path, call.options);
+      // Une API antérieure ne renvoie que `quota` : l'assistant est alors
+      // supposé disponible, et le serveur refuse l'appel s'il ne l'est pas.
+      const data = await apiRequest<{ enabled?: boolean; quota: AiQuotaDto }>(
+        call.path,
+        call.options,
+      );
 
-      return data.quota;
+      return { enabled: data.enabled !== false, quota: data.quota };
     },
   });
 }
@@ -626,8 +636,12 @@ export function useAiAnswer(): UseMutationResult<AiAnswerDto, unknown, AiTaskKey
       return apiRequest<AiAnswerDto>(call.path, call.options);
     },
     onSuccess: (answer) => {
-      // La réponse porte le quota restant : inutile de le redemander.
-      queryClient.setQueryData(queryKeys.aiQuota, answer.quota);
+      // La réponse porte le quota restant : inutile de le redemander. Une
+      // réponse obtenue prouve que l'assistant est disponible.
+      queryClient.setQueryData<AiStatusDto>(queryKeys.aiQuota, {
+        enabled: true,
+        quota: answer.quota,
+      });
     },
   });
 }

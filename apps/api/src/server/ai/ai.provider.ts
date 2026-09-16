@@ -53,6 +53,11 @@ export function setAiProviderForTesting(provider: AiProvider | null): void {
  *
  * `openai` sans clé configurée renvoie `null` : mieux vaut une fonctionnalité
  * explicitement absente qu'un appel voué à échouer à chaque requête.
+ *
+ * `mock` est ignoré en production : c'est un double de test, dont les phrases
+ * fabriquées ne doivent jamais être présentées à un utilisateur réel comme une
+ * réponse de l'assistant. L'IA y est alors simplement désactivée, sans bloquer
+ * le démarrage — elle n'est jamais un prérequis (B.3).
  */
 export function resolveAiProvider(): AiProvider | null {
   if (override !== null) {
@@ -63,7 +68,7 @@ export function resolveAiProvider(): AiProvider | null {
 
   switch (env.AI_PROVIDER) {
     case 'mock':
-      return createMockProvider();
+      return env.NODE_ENV === 'production' ? null : createMockProvider();
     case 'openai':
       return env.AI_API_KEY.length === 0 ? null : createOpenAiProvider();
     default:

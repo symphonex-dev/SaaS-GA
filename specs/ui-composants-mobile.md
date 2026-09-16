@@ -145,6 +145,8 @@ Voir `specs/comparateur-et-assistant-ia.md` Partie B. Aucune interface de type c
 
 Implémenté par `components/ai-assistant.tsx`, affiché dans le tableau de bord. Les trois requêtes (`POST /api/ai/summary`, `/api/ai/explain-increase`, `/api/ai/recommendation`) partent avec un **corps vide** : le contexte est constitué côté serveur à partir de chiffres déjà calculés (B.5). Le mobile ne peut donc ni orienter la réponse, ni envoyer de texte libre, ni contourner le quota — décompté par le serveur avant l'appel au provider. Le composant affiche le niveau d'incertitude déclaré, le quota restant, et signale explicitement une réponse `degraded` (repli statique traduit).
 
+Quand l'IA est désactivée côté serveur (`AI_PROVIDER=none`, valeur par défaut), `GET /api/ai/summary` renvoie `enabled: false` : la carte n'affiche alors qu'un avis traduit (`errors.AI_UNAVAILABLE`), sans bouton ni compteur de crédits. Le reste du tableau de bord est inchangé, et l'activation ultérieure d'un provider ne demande aucune mise à jour de l'application.
+
 ---
 
 ## 10. Saisie manuelle (fonction secondaire uniquement)

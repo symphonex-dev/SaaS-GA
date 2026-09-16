@@ -1,6 +1,7 @@
 import {
   ERROR_CODES,
   type AiAnswerDto,
+  type AiStatusDto,
   type AiTask,
   type AuthenticatedUser,
   type CommercializedPlan,
@@ -14,7 +15,7 @@ import { subscriptionRepository } from '@/server/repositories/subscription.repos
 import { buildAiFacts, type AiFacts } from './ai.context';
 import { logAiRejection, safeFallbackResponse, validateAiOutput } from './ai.guardrails';
 import { buildSystemPrompt, AI_SYSTEM_PROMPT_VERSION } from './ai.prompt';
-import { resolveAiProvider } from './ai.provider';
+import { isAiEnabled, resolveAiProvider } from './ai.provider';
 import { consumeAiCredit, readAiQuota } from './ai.quota';
 import { serializeAiContext } from './ai.redaction';
 
@@ -165,5 +166,16 @@ export const aiService = {
   /** État du quota, sans consommer de crédit. */
   async quota(user: AuthenticatedUser, now: Date = new Date()): Promise<AiAnswerDto['quota']> {
     return readAiQuota(user.id, await planOf(user, now), now);
+  },
+
+  /**
+   * Disponibilité de l'assistant et quota, sans consommer de crédit.
+   *
+   * Permet au mobile de ne pas proposer trois boutons voués à l'échec quand
+   * l'IA est désactivée (`AI_PROVIDER=none`, valeur par défaut). Le refus reste
+   * appliqué par `runTask` : cette information ne sert qu'à l'affichage.
+   */
+  async status(user: AuthenticatedUser, now: Date = new Date()): Promise<AiStatusDto> {
+    return { enabled: isAiEnabled(), quota: await aiService.quota(user, now) };
   },
 };

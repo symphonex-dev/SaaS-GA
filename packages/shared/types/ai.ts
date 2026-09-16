@@ -29,3 +29,15 @@ export interface AiAnswerDto {
   quota: AiQuotaDto;
   generatedAt: IsoDateTimeString;
 }
+
+/**
+ * État de l'assistant, lu sans consommer de crédit (`GET /api/ai/summary`).
+ *
+ * `enabled` est résolu par le serveur à partir de sa configuration
+ * (`AI_PROVIDER`) : le mobile n'en déduit rien d'autre que l'affichage — un
+ * appel reste de toute façon refusé (`AI_UNAVAILABLE`) quand l'IA est coupée.
+ */
+export interface AiStatusDto {
+  enabled: boolean;
+  quota: AiQuotaDto;
+}

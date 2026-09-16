@@ -20,10 +20,13 @@ export const POST = route(async (request) => {
   return jsonSuccess(await aiService.monthlySummary(user));
 });
 
-/** GET — état du quota mensuel, sans consommer de crédit. */
+/**
+ * GET — disponibilité de l'assistant (`enabled`) et quota mensuel, sans
+ * consommer de crédit.
+ */
 export const GET = route(async (request) => {
   const user = await requireUser(request);
   await enforceRateLimit('api:general', user.id);
 
-  return jsonSuccess({ quota: await aiService.quota(user) });
+  return jsonSuccess(await aiService.status(user));
 });

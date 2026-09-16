@@ -1,5 +1,6 @@
 import type {
   AiAnswerDto,
+  AiStatusDto,
   AuthenticatedSessionDto,
   DashboardData,
 } from '@subscription-manager/shared';
@@ -14,7 +15,11 @@ import { GET as recurringRoute } from '@/app/api/recurring/route';
 import { resetServerEnvCache } from '@/lib/env/server';
 import { resetRateLimits } from '@/lib/security/rate-limit';
 import { buildAiFacts } from '@/server/ai/ai.context';
-import { setAiProviderForTesting, type AiGenerationInput } from '@/server/ai/ai.provider';
+import {
+  isAiEnabled,
+  setAiProviderForTesting,
+  type AiGenerationInput,
+} from '@/server/ai/ai.provider';
 import { createMockProvider, createScriptedProvider } from '@/server/ai/providers/mock.provider';
 import { recurringDetectionService } from '@/server/services/recurring-detection.service';
 
@@ -280,6 +285,68 @@ describe('assistant IA borné', () => {
     );
 
     expect(comparisons.comparisons).toHaveLength(1);
+  });
+
+  it('indique au mobile si l’assistant est disponible, sans consommer de crédit', async () => {
+    const actif = await expectSuccess<AiStatusDto>(
+      await quotaRoute(apiRequest('/api/ai/summary', { token: session.token })),
+    );
+
+    expect(actif.enabled).toBe(true);
+
+    process.env['AI_PROVIDER'] = 'none';
+    resetServerEnvCache();
+
+    const coupe = await expectSuccess<AiStatusDto>(
+      await quotaRoute(apiRequest('/api/ai/summary', { token: session.token })),
+    );
+
+    expect(coupe.enabled).toBe(false);
+    expect(coupe.quota.creditsUsed).toBe(0);
+    expect(coupe.quota.creditsRemaining).toBe(3);
+  });
+
+  it('considère l’IA désactivée quand AI_PROVIDER est absent ou openai sans clé', async () => {
+    delete process.env['AI_PROVIDER'];
+    resetServerEnvCache();
+
+    expect(isAiEnabled()).toBe(false);
+
+    process.env['AI_PROVIDER'] = 'openai';
+    process.env['AI_API_KEY'] = '';
+    resetServerEnvCache();
+
+    expect(isAiEnabled()).toBe(false);
+
+    const response = await summaryRoute(post('/api/ai/summary', session.token));
+
+    expect(await expectErrorCode(response)).toBe('AI_UNAVAILABLE');
+
+    delete process.env['AI_API_KEY'];
+  });
+
+  it('n’utilise jamais le provider de test en production', async () => {
+    const previousEnv = process.env;
+    process.env = { ...previousEnv, NODE_ENV: 'production', AI_PROVIDER: 'mock' };
+    resetServerEnvCache();
+
+    try {
+      expect(isAiEnabled()).toBe(false);
+
+      const response = await summaryRoute(post('/api/ai/summary', session.token));
+
+      expect(await expectErrorCode(response)).toBe('AI_UNAVAILABLE');
+
+      const status = await expectSuccess<AiStatusDto>(
+        await quotaRoute(apiRequest('/api/ai/summary', { token: session.token })),
+      );
+
+      expect(status.enabled).toBe(false);
+      expect(status.quota.creditsUsed).toBe(0);
+    } finally {
+      process.env = previousEnv;
+      resetServerEnvCache();
+    }
   });
 
   it('applique un rate limit dédié, plus strict que l’API générale', async () => {

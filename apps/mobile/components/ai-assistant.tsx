@@ -6,7 +6,7 @@ import { Button } from './controls';
 import { Card } from './layout';
 import { ErrorState, LoadingState, Notice, Pill } from './states';
 import { errorCode, errorMessage } from '../lib/errors';
-import { useAiAnswer, useAiQuota, type AiTaskKey } from '../lib/hooks';
+import { useAiAnswer, useAiStatus, type AiTaskKey } from '../lib/hooks';
 
 /**
  * Assistant IA borné (`specs/ui-composants-mobile.md` §9,
@@ -26,15 +26,29 @@ import { useAiAnswer, useAiQuota, type AiTaskKey } from '../lib/hooks';
  *
  * Une réponse `degraded` est le repli statique traduit du serveur, affiché
  * comme tel : l'IA est un enrichissement, jamais un prérequis fonctionnel.
+ *
+ * IA désactivée côté serveur (`AI_PROVIDER=none`, valeur par défaut) : la
+ * carte n'affiche qu'un avis, sans bouton ni compteur de crédits. Les usages
+ * n'apparaissent qu'une fois la disponibilité lue ; si la lecture échoue, ils
+ * restent proposés — le serveur refuse de toute façon l'appel.
  */
 const TASKS: readonly AiTaskKey[] = ['MONTHLY_SUMMARY', 'EXPLAIN_INCREASE', 'RECOMMENDATION'];
 
 export function AiAssistant(): ReactNode {
   const { t } = useTranslation();
-  const quota = useAiQuota();
+  const status = useAiStatus();
   const answer = useAiAnswer();
 
-  const remaining = answer.data?.quota.creditsRemaining ?? quota.data?.creditsRemaining ?? null;
+  if (status.data?.enabled === false) {
+    return (
+      <Card title={t('ai.title')}>
+        <Notice title={t('errors.AI_UNAVAILABLE')} />
+      </Card>
+    );
+  }
+
+  const remaining =
+    answer.data?.quota.creditsRemaining ?? status.data?.quota.creditsRemaining ?? null;
   const unavailable = errorCode(answer.error) === 'AI_UNAVAILABLE';
   const quotaExceeded = errorCode(answer.error) === 'AI_QUOTA_EXCEEDED';
 
@@ -49,20 +63,22 @@ export function AiAssistant(): ReactNode {
         />
       )}
 
-      <View className="w-full gap-2 pt-1">
-        {TASKS.map((task) => (
-          <Button
-            key={task}
-            label={t(`ai.tasks.${task}`)}
-            variant="secondary"
-            loading={answer.isPending && answer.variables === task}
-            disabled={answer.isPending}
-            onPress={() => {
-              answer.mutate(task);
-            }}
-          />
-        ))}
-      </View>
+      {status.isPending ? null : (
+        <View className="w-full gap-2 pt-1">
+          {TASKS.map((task) => (
+            <Button
+              key={task}
+              label={t(`ai.tasks.${task}`)}
+              variant="secondary"
+              loading={answer.isPending && answer.variables === task}
+              disabled={answer.isPending}
+              onPress={() => {
+                answer.mutate(task);
+              }}
+            />
+          ))}
+        </View>
+      )}
 
       {answer.isPending ? <LoadingState label={t('ai.pending')} /> : null}
 
