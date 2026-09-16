@@ -9,7 +9,11 @@ import { randomBytes } from 'node:crypto';
 
 import { AuthErrors } from '@/lib/api/errors';
 import { getServerEnv } from '@/lib/env/server';
-import { buildPasswordResetUrl, getMailer } from '@/lib/mail/mailer';
+import {
+  buildPasswordResetUrl,
+  getMailer,
+  reportPasswordResetWithoutAccount,
+} from '@/lib/mail/mailer';
 import { resolveLocale } from '@/lib/mail/templates';
 import { hashPassword, verifyPassword } from '@/lib/security/password';
 import { generatePasswordResetToken, hashPasswordResetToken } from '@/lib/security/tokens';
@@ -138,6 +142,8 @@ export const authService = {
     const user = await userRepository.findActiveByEmail(email);
 
     if (user === null) {
+      // Réponse inchangée ; seul le terminal de développement le signale.
+      reportPasswordResetWithoutAccount(email);
       return;
     }
 

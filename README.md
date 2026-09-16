@@ -109,7 +109,7 @@ Une URL d'API publique n'est pas un secret. En revanche, **aucune clé ni aucun 
 
 En développement, une requête en échec écrit un diagnostic dans la console Metro — méthode, URL appelée, code HTTP, cause réseau (DNS / connexion refusée / délai dépassé), plateforme et provenance de l'URL configurée. Il ne contient ni en-tête, ni jeton, ni donnée utilisateur, et n'existe pas en production.
 
-Pour dérouler le parcours « mot de passe oublié » en local, mettre `EMAIL_PROVIDER="console"` : le lien de réinitialisation est écrit dans la sortie standard de l'API. Ce transport est refusé en production — le lien contient le token brut.
+Pour dérouler le parcours « mot de passe oublié » en local, rien à configurer : avec `next dev` et `EMAIL_PROVIDER` à `noop` (défaut) ou `console`, l'e-mail n'est pas envoyé mais **affiché dans le terminal de l'API** — objet, langue, destinataire masqué, texte du message, et surtout le lien de réinitialisation et le jeton, chacun seul sur sa ligne pour être copié. Le lien `subscription-manager://reset-password?token=…` s'ouvre sur un téléphone où le *development build* est installé ; le jeton sert à appeler directement `POST /api/auth/reset-password` (`{ "token", "password" }`). Si l'adresse ne correspond à aucun compte actif **de la base utilisée par l'API locale**, aucun e-mail n'est préparé : le terminal l'indique par une ligne `[dev] Réinitialisation demandée pour a***@… : aucun compte actif…`, alors que la réponse envoyée à l'application reste identique dans les deux cas. Ce transport est refusé en production — le lien contient le token brut.
 
 ### Build de développement (modules natifs absents d'Expo Go)
 

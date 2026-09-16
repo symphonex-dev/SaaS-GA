@@ -6,7 +6,10 @@ import {
   MailDeliveryError,
   buildPasswordResetUrl,
   createResendMailer,
+  formatDevEmailPreview,
   getMailer,
+  maskEmailAddress,
+  reportPasswordResetWithoutAccount,
   setMailerForTests,
   type FetchLike,
 } from '@/lib/mail/mailer';
@@ -298,6 +301,100 @@ describe('gabarits traduits', () => {
     // Le message ne contient que le lien et sa validité : ni e-mail, ni montant,
     // ni identifiant. Un e-mail transite par des serveurs tiers.
     expect(template.text).not.toMatch(/@/);
+  });
+});
+
+describe('aperçu de l’e-mail dans le terminal de développement', () => {
+  const email = {
+    to: 'alice.martin@gmail.com',
+    resetUrl: 'subscription-manager://reset-password?token=abc_DEF-123',
+    locale: 'fr' as const,
+  };
+
+  function useDevelopment(provider: 'console' | 'noop'): void {
+    process.env = { ...previousEnv, NODE_ENV: 'development', EMAIL_PROVIDER: provider };
+    resetServerEnvCache();
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('isole le lien et le jeton, chacun seul sur sa ligne pour être copié', () => {
+    const lines = formatDevEmailPreview(email, 30).split('\n');
+
+    expect(lines).toContain(email.resetUrl);
+    expect(lines).toContain('abc_DEF-123');
+  });
+
+  it('reprend l’objet et le texte de l’e-mail dans la langue du compte', () => {
+    const preview = formatDevEmailPreview(email, 30);
+    const template = passwordResetTemplate('fr', email.resetUrl, 30);
+
+    expect(preview).toContain(template.subject);
+    expect(preview).toContain(template.text);
+    expect(preview).toContain('30 minutes');
+  });
+
+  it('masque l’adresse du destinataire', () => {
+    const preview = formatDevEmailPreview(email, 30);
+
+    expect(preview).toContain('a***@gmail.com');
+    expect(preview).not.toContain(email.to);
+    expect(maskEmailAddress('sans-arobase')).toBe('***');
+    expect(maskEmailAddress('@example.com')).toBe('***');
+  });
+
+  it('n’invente pas de jeton quand le lien n’en porte pas', () => {
+    const preview = formatDevEmailPreview({ ...email, resetUrl: 'pas une url' }, 30);
+
+    expect(preview).not.toContain('Jeton seul');
+    expect(preview.split('\n')).toContain('pas une url');
+  });
+
+  it.each(['console', 'noop'] as const)(
+    'affiche l’e-mail avec EMAIL_PROVIDER=%s',
+    async (provider) => {
+      useDevelopment(provider);
+      const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+
+      await getMailer().sendPasswordReset(email);
+
+      expect(info).toHaveBeenCalledTimes(1);
+      expect(String(info.mock.calls[0]?.[0])).toContain(email.resetUrl);
+    },
+  );
+
+  it('signale en développement une demande sans compte, adresse masquée', () => {
+    useDevelopment('console');
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+
+    reportPasswordResetWithoutAccount(email.to);
+
+    expect(info).toHaveBeenCalledTimes(1);
+    expect(String(info.mock.calls[0]?.[0])).toContain('a***@gmail.com');
+    expect(String(info.mock.calls[0]?.[0])).not.toContain(email.to);
+  });
+
+  it('ne signale jamais une demande sans compte hors développement', () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+
+    reportPasswordResetWithoutAccount(email.to);
+    process.env = { ...previousEnv, NODE_ENV: 'production' };
+    resetServerEnvCache();
+    reportPasswordResetWithoutAccount(email.to);
+
+    expect(info).not.toHaveBeenCalled();
+  });
+
+  it('reste silencieux hors développement avec le transport par défaut', async () => {
+    process.env['EMAIL_PROVIDER'] = 'noop';
+    resetServerEnvCache();
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+
+    await getMailer().sendPasswordReset(email);
+
+    expect(info).not.toHaveBeenCalled();
   });
 });
 

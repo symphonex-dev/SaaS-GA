@@ -4,6 +4,7 @@ import { POST as login } from '@/app/api/auth/login/route';
 import { POST as requestReset } from '@/app/api/auth/request-password-reset/route';
 import { POST as resetPassword } from '@/app/api/auth/reset-password/route';
 import { GET as session } from '@/app/api/auth/session/route';
+import { resetServerEnvCache } from '@/lib/env/server';
 import { resetRateLimits } from '@/lib/security/rate-limit';
 import { hashPasswordResetToken } from '@/lib/security/tokens';
 import { MailDeliveryError, getMailer, setMailerForTests } from '@/lib/mail/mailer';
@@ -86,6 +87,31 @@ describe('réinitialisation de mot de passe', () => {
     );
 
     expect(tables.passwordResetToken.rows).toHaveLength(0);
+  });
+
+  it('signale une adresse inconnue dans le terminal de développement, réponse inchangée', async () => {
+    const previousEnv = process.env;
+    process.env = { ...previousEnv, NODE_ENV: 'development' };
+    resetServerEnvCache();
+    const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+
+    try {
+      const response = await requestReset(
+        apiRequest('/api/auth/request-password-reset', {
+          method: 'POST',
+          body: { email: 'jamais-inscrit@example.com' },
+          headers: { 'x-forwarded-for': '10.4.0.9' },
+        }),
+      );
+
+      expect(response.status).toBe(200);
+      expect(info).toHaveBeenCalledTimes(1);
+      expect(String(info.mock.calls[0]?.[0])).toContain('j***@example.com');
+      expect(tables.passwordResetToken.rows).toHaveLength(0);
+    } finally {
+      process.env = previousEnv;
+      resetServerEnvCache();
+    }
   });
 
   it("ne stocke que l'empreinte du token, jamais le token brut", async () => {
