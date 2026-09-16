@@ -32,6 +32,7 @@
   "include": [
     "next.config.ts",
     "prisma/**/*.ts",
+    "scripts/**/*.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
     "tests/**/*.ts",

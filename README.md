@@ -183,6 +183,7 @@ Toutes se lancent depuis la racine et s'appliquent aux trois workspaces.
 | `npm run db:migrate` | `prisma migrate dev` (développement) |
 | `npm run db:migrate:deploy` | `prisma migrate deploy` (CI / production) |
 | `npm run db:seed` | Offres de comparaison de démonstration |
+| `npm run user:set-password --workspace=apps/api -- <adresse> [--dry-run]` | Définit le mot de passe d'un compte existant (saisie masquée, ou `NEW_PASSWORD`) ; sessions et liens de réinitialisation révoqués. Vise la base de `apps/api/.env.local`, affichée avant écriture |
 
 Cibler un seul test :
 

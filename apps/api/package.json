@@ -16,7 +16,8 @@
     "db:migrate:diff": "prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
-    "dev:lan": "next dev --hostname 0.0.0.0"
+    "dev:lan": "next dev --hostname 0.0.0.0",
+    "user:set-password": "tsx scripts/set-password.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
