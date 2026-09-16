@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { productionReadinessIssues } from '@/lib/env/production-readiness';
 import { getServerEnv, resetServerEnvCache } from '@/lib/env/server';
 import {
   consumeRateLimit,
@@ -257,5 +258,59 @@ describe('par défaut, le magasin reste en mémoire hors production', () => {
 
     expect(tables.importPreview.rows).toHaveLength(0);
     expect(await getPreview(importId, 'usr_1')).not.toBeNull();
+  });
+});
+
+describe('magasin retenu quand la variable est absente', () => {
+  function useEnvironmentWithoutStores(nodeEnv: 'development' | 'test' | 'production'): void {
+    const env: NodeJS.ProcessEnv = { ...previousEnv, NODE_ENV: nodeEnv };
+    delete env['IMPORT_PREVIEW_STORE'];
+    delete env['RATE_LIMIT_STORE'];
+    process.env = env;
+    resetServerEnvCache();
+  }
+
+  function storeIssues(): string[] {
+    return productionReadinessIssues(getServerEnv())
+      .map((issue) => issue.variable)
+      .filter((variable) => variable.endsWith('_STORE'));
+  }
+
+  it.each(['development', 'test'] as const)('reste en mémoire en %s', (nodeEnv) => {
+    useEnvironmentWithoutStores(nodeEnv);
+
+    expect(getServerEnv().IMPORT_PREVIEW_STORE).toBe('memory');
+    expect(getServerEnv().RATE_LIMIT_STORE).toBe('memory');
+  });
+
+  it('passe à PostgreSQL en production, sans bloquer le démarrage', () => {
+    useEnvironmentWithoutStores('production');
+
+    expect(getServerEnv().IMPORT_PREVIEW_STORE).toBe('postgres');
+    expect(getServerEnv().RATE_LIMIT_STORE).toBe('postgres');
+    expect(storeIssues()).toEqual([]);
+  });
+
+  it('écrit réellement en base en production', async () => {
+    useEnvironmentWithoutStores('production');
+
+    const importId = createPreviewId();
+
+    await consumeRateLimit('auth:login', '10.0.0.6');
+    await storePreview(previewPayload('usr_1', importId));
+
+    expect(tables.rateLimitCounter.rows).toHaveLength(1);
+    expect(tables.importPreview.rows).toHaveLength(1);
+  });
+
+  it('ne remplace jamais une valeur explicite, qui reste refusée en production', () => {
+    useEnvironmentWithoutStores('production');
+    process.env['IMPORT_PREVIEW_STORE'] = 'memory';
+    process.env['RATE_LIMIT_STORE'] = 'memory';
+    resetServerEnvCache();
+
+    expect(getServerEnv().IMPORT_PREVIEW_STORE).toBe('memory');
+    expect(getServerEnv().RATE_LIMIT_STORE).toBe('memory');
+    expect(storeIssues().sort()).toEqual(['IMPORT_PREVIEW_STORE', 'RATE_LIMIT_STORE']);
   });
 });

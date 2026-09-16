@@ -139,15 +139,17 @@ Ouvrir ensuite l'application installée : elle affiche l'écran du *development 
 
 ## Mise en production
 
-Le serveur **refuse de démarrer** en production si l'une de ces variables manque ou reste sur une valeur de développement (`apps/api/src/instrumentation.ts`). Ce n'est pas une précaution excessive : les trois pannes évitées sont invisibles jusqu'à ce qu'un utilisateur les subisse.
+Le serveur **refuse de démarrer** en production si l'une de ces variables reste sur une valeur de développement, ou manque pour les variables e-mail (`apps/api/src/instrumentation.ts`). Ce n'est pas une précaution excessive : les trois pannes évitées sont invisibles jusqu'à ce qu'un utilisateur les subisse.
 
 | Variable | Valeur exigée | Ce qui casse sinon |
 |---|---|---|
 | `EMAIL_PROVIDER` | `resend` | Une demande de mot de passe oublié reste sans réponse : l'utilisateur est bloqué hors de son compte. |
 | `EMAIL_PROVIDER_API_KEY` | clé du fournisseur | Aucun envoi ne part. |
 | `EMAIL_FROM` | expéditeur d'un domaine vérifié | Le fournisseur refuse l'envoi. |
-| `RATE_LIMIT_STORE` | `postgres` | Chaque instance compte séparément : avec N instances la limite réelle est N fois la limite annoncée. |
-| `IMPORT_PREVIEW_STORE` | `postgres` | La confirmation d'un import échoue dès qu'elle atteint une autre instance, et tout redémarrage perd les aperçus en cours. |
+| `RATE_LIMIT_STORE` | `postgres` — **défaut en production**, rien à déclarer | Chaque instance compte séparément : avec N instances la limite réelle est N fois la limite annoncée. |
+| `IMPORT_PREVIEW_STORE` | `postgres` — **défaut en production**, rien à déclarer | La confirmation d'un import échoue dès qu'elle atteint une autre instance, et tout redémarrage perd les aperçus en cours. |
+
+Les deux magasins n'ont pas besoin d'être déclarés : absents, ils valent `postgres` en production et `memory` ailleurs. Seule une valeur `memory` **explicite** bloque le démarrage — c'est le cas si `.env.example` a été recopié tel quel chez l'hébergeur d'une version antérieure : retirer alors ces deux variables.
 
 Deux tables portent ces états partagés (migration `20260906120000_shared_stores`) :
 

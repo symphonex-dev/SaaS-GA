@@ -36,9 +36,9 @@ const REASONS: Readonly<Record<string, string>> = {
   EMAIL_FROM:
     "le transport réel est sélectionné mais n'a aucun expéditeur : le fournisseur refusera l'envoi.",
   IMPORT_PREVIEW_STORE:
-    "en mémoire de process, la confirmation d'import échoue dès qu'elle atteint une autre instance, et tout redémarrage perd les aperçus en cours.",
+    "en mémoire de process, la confirmation d'import échoue dès qu'elle atteint une autre instance, et tout redémarrage perd les aperçus en cours. Retirer la variable (défaut « postgres » en production) ou la fixer à « postgres ».",
   RATE_LIMIT_STORE:
-    'en mémoire de process, chaque instance compte séparément : avec N instances la limite réelle est N fois la limite annoncée.',
+    'en mémoire de process, chaque instance compte séparément : avec N instances la limite réelle est N fois la limite annoncée. Retirer la variable (défaut « postgres » en production) ou la fixer à « postgres ».',
 };
 
 /**
@@ -46,6 +46,9 @@ const REASONS: Readonly<Record<string, string>> = {
  *
  * Hors production, la liste est toujours vide : `memory` et `console` sont des
  * choix légitimes en développement.
+ *
+ * En production, un magasin n'est signalé que s'il a été **explicitement**
+ * fixé à `memory` : absent, il vaut déjà `postgres` (`defaultSharedStore`).
  */
 export function productionReadinessIssues(env: ReadinessEnv): ReadinessIssue[] {
   if (env.NODE_ENV !== 'production') {

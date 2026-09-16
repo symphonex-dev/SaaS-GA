@@ -11,7 +11,28 @@ import { z } from 'zod';
  * par Prisma (`prisma/schema.prisma`), et l'exiger dans ce module obligerait
  * les tests unitaires à disposer d'une base.
  */
-const serverEnvSchema = z.object({
+const sharedStoreSchema = z.enum(['memory', 'postgres']);
+
+export type SharedStore = z.infer<typeof sharedStoreSchema>;
+
+/**
+ * Magasin retenu quand `IMPORT_PREVIEW_STORE` ou `RATE_LIMIT_STORE` est absent.
+ *
+ * En production, `memory` est de toute façon refusé au démarrage
+ * (`src/lib/env/production-readiness.ts`) : en faire le défaut obligeait à
+ * déclarer deux variables dont une seule valeur est acceptable, et un
+ * déploiement qui les oubliait ne démarrait pas. Le défaut suit donc
+ * l'environnement — `postgres` en production, `memory` ailleurs, où il n'exige
+ * aucune base.
+ *
+ * Une valeur explicite n'est jamais remplacée : `memory` fixé en production
+ * reste `memory`, et reste refusé.
+ */
+export function defaultSharedStore(nodeEnv: string): SharedStore {
+  return nodeEnv === 'production' ? 'postgres' : 'memory';
+}
+
+const serverEnvShape = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 
   /**
@@ -83,8 +104,10 @@ const serverEnvSchema = z.object({
    * confirmation doit atteindre celui qui a produit l'aperçu, ce qui échoue une
    * fois sur deux. `postgres` est **obligatoire en production** — la contrainte
    * est vérifiée au démarrage (`src/instrumentation.ts`).
+   *
+   * Absente, la variable prend la valeur de `defaultSharedStore`.
    */
-  IMPORT_PREVIEW_STORE: z.enum(['memory', 'postgres']).default('memory'),
+  IMPORT_PREVIEW_STORE: sharedStoreSchema.optional(),
 
   /**
    * Emplacement des compteurs de rate limiting.
@@ -92,8 +115,10 @@ const serverEnvSchema = z.object({
    * `memory` compte par process : avec N instances, la limite réelle est N fois
    * la limite annoncée. `postgres` partage le compteur et est **obligatoire en
    * production**.
+   *
+   * Absente, la variable prend la valeur de `defaultSharedStore`.
    */
-  RATE_LIMIT_STORE: z.enum(['memory', 'postgres']).default('memory'),
+  RATE_LIMIT_STORE: sharedStoreSchema.optional(),
 
   // --- Administration du comparateur (A.8) ---------------------------------
   /**
@@ -174,6 +199,12 @@ const serverEnvSchema = z.object({
    */
   BILLING_CRON_SECRET: z.string().default(''),
 });
+
+const serverEnvSchema = serverEnvShape.transform((env) => ({
+  ...env,
+  IMPORT_PREVIEW_STORE: env.IMPORT_PREVIEW_STORE ?? defaultSharedStore(env.NODE_ENV),
+  RATE_LIMIT_STORE: env.RATE_LIMIT_STORE ?? defaultSharedStore(env.NODE_ENV),
+}));
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
