@@ -195,7 +195,41 @@ Avec `nextCheckAt` = `lastVerifiedAt` + 30 jours, une offre passe directement de
 
 ### Aucun job à planifier pour les offres
 
-Le rapprochement est **recalculé à chaque lecture** (`GET /api/comparisons`, `GET /api/comparisons/<expenseId>`, `GET /api/dashboard`), avec l'heure courante : une offre revérifiée réapparaît et une offre échue disparaît sans aucune tâche planifiée. `POST /api/comparisons/<expenseId>/refresh` fait exactement le même calcul à la demande de l'utilisateur ; il ne collecte aucun prix. Le seul job d'exploitation de l'API reste `POST /api/billing/expire-overdue` (facturation, sans rapport avec les offres).
+Le rapprochement est **recalculé à chaque lecture** (`GET /api/comparisons`, `GET /api/comparisons/<expenseId>`, `GET /api/dashboard`), avec l'heure courante : une offre revérifiée réapparaît et une offre échue disparaît sans aucune tâche planifiée. `POST /api/comparisons/<expenseId>/refresh` fait exactement le même calcul à la demande de l'utilisateur ; il ne collecte aucun prix. Le seul job d'exploitation de l'API reste `POST /api/billing/expire-overdue` (facturation, sans rapport avec les offres, voir §7 ter).
+
+---
+
+## 7 ter. Job d'expiration des abonnements échus
+
+`POST /api/billing/expire-overdue` repasse à Free les abonnements Plus dont la période est échue sans que le store ait envoyé de notification d'expiration (`specs/paiement-in-app.md` §6). C'est un filet de secours : l'application refuse déjà l'accès payant après `currentPeriodEnd`, le job remet la base en cohérence (plan, statut `EXPIRED`).
+
+**Protection.** La route exige `Authorization: Bearer <BILLING_CRON_SECRET>`, comparé en temps constant. En-tête absent, schéma autre que `Bearer` ou secret différent : **401** `AUTH_UNAUTHORIZED`, sans rien modifier. Tant que `BILLING_CRON_SECRET` est vide sur le serveur, **tout** appel est refusé.
+
+### Mise en place (GitHub Actions)
+
+Le workflow `.github/workflows/expire-overdue.yml` appelle la route **tous les jours à 03:17 UTC**, et peut être lancé à la main.
+
+1. Générer un secret long et aléatoire :
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   ```
+2. **Vercel** → projet de l'API → Settings → Environment Variables : `BILLING_CRON_SECRET` = ce secret (environnement *Production*), puis redéployer.
+3. **GitHub** → dépôt → Settings → Secrets and variables → Actions :
+   - onglet *Secrets* : `BILLING_CRON_SECRET` = **la même valeur** ;
+   - onglet *Variables* : `API_BASE_URL` = URL de production de l'API, sans `/` final (par exemple `https://saa-s-ga-api.vercel.app`).
+4. Onglet *Actions* → « Expiration des abonnements échus » → *Run workflow*. Réponse attendue dans le journal : `{"success":true,"data":{"expired":0}}` (ou le nombre d'abonnements repassés à Free). Un 401 signale un secret absent sur Vercel ou différent entre les deux.
+
+Contrôle manuel du refus (doit répondre 401) :
+
+```bash
+curl -i -X POST https://saa-s-ga-api.vercel.app/api/billing/expire-overdue
+```
+
+### Limites et alternatives
+
+- GitHub ne lance les workflows planifiés que sur la branche par défaut, avec un retard possible aux heures chargées. Dans un dépôt **public**, ils sont désactivés après 60 jours sans activité : les réactiver depuis l'onglet *Actions*. Un retard est sans conséquence sur les droits (voir plus haut).
+- **Vercel Cron n'est pas utilisé** : il appelle la route en `GET` (avec le secret `CRON_SECRET`), alors qu'elle n'accepte que `POST` — il obtiendrait un 405. L'utiliser demanderait d'ajouter un gestionnaire `GET` à la route, un `apps/api/vercel.json` déclarant le cron, et `CRON_SECRET` égal à `BILLING_CRON_SECRET`. Sur l'offre Hobby, un cron Vercel ne peut tourner qu'une fois par jour.
+- Un **service externe** (cron-job.org, etc.) convient aussi, à condition d'envoyer un `POST` avec l'en-tête `Authorization: Bearer <secret>` — le secret est alors confié à ce service.
 
 ---
 

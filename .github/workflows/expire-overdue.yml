@@ -1,0 +1,65 @@
+name: Expiration des abonnements échus
+
+# Déclenche le job de secours de `specs/paiement-in-app.md` §6 :
+# POST /api/billing/expire-overdue repasse à FREE les abonnements dont la
+# période est échue sans notification d'expiration du store.
+#
+# Planifié ici plutôt que par Vercel Cron : Vercel Cron appelle la route en
+# GET, alors qu'elle n'accepte que POST. Procédure et prérequis :
+# `ACTIONS_MANUELLES.md` §7 ter.
+#
+# Prérequis dans les paramètres du dépôt (Settings → Secrets and variables →
+# Actions) :
+#   - variable `API_BASE_URL` : URL de production de l'API, sans `/` final ;
+#   - secret `BILLING_CRON_SECRET` : même valeur que sur Vercel.
+on:
+  schedule:
+    # Tous les jours à 03:17 UTC. Minute non ronde : les créneaux pleins sont
+    # les plus chargés, et GitHub y retarde davantage les exécutions.
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: expire-overdue
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  expire-overdue:
+    name: POST /api/billing/expire-overdue
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Déclencher le job
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          BILLING_CRON_SECRET: ${{ secrets.BILLING_CRON_SECRET }}
+        run: |
+          if [ -z "$API_BASE_URL" ] || [ -z "$BILLING_CRON_SECRET" ]; then
+            echo "::error::Variable API_BASE_URL ou secret BILLING_CRON_SECRET absent des paramètres du dépôt."
+            exit 1
+          fi
+
+          # Le job est idempotent : relancer après une panne passagère est sans risque.
+          status=$(curl --silent --show-error --max-time 60 --retry 2 \
+            --output response.json --write-out '%{http_code}' \
+            --request POST \
+            --header "Authorization: Bearer ${BILLING_CRON_SECRET}" \
+            "${API_BASE_URL%/}/api/billing/expire-overdue")
+
+          # La réponse ne contient que le nombre d'abonnements expirés, ou un
+          # code d'erreur : rien de personnel.
+          cat response.json
+          echo
+
+          if [ "$status" = "401" ]; then
+            echo "::error::Réponse HTTP 401 : BILLING_CRON_SECRET vide sur Vercel ou différent de celui du dépôt."
+            exit 1
+          fi
+
+          if [ "$status" != "200" ]; then
+            echo "::error::Réponse HTTP ${status}."
+            exit 1
+          fi
