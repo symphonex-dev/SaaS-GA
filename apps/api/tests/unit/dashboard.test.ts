@@ -308,6 +308,35 @@ describe('tableau de bord', () => {
       expect(dashboard.savings.potential).toEqual({ minorUnits: '9000', currency: 'EUR' });
     });
 
+    it('ignore une offre vérifiée il y a plus de 30 jours, même avant sa prochaine vérification', async () => {
+      for (const date of ['2025-12-05', '2026-01-05', '2026-02-05', '2026-03-05']) {
+        await seedExpense({ userId: session.user.id, date, amount: '13.49' });
+      }
+
+      await recurringDetectionService.refreshForUser(session.user.id);
+
+      await tables.comparisonOffer.create({
+        data: {
+          serviceName: 'Netflix',
+          country: 'FR',
+          verifiedPrice: '5.99',
+          currency: 'EUR',
+          billingCycle: 'MONTHLY',
+          featuresIncluded: [],
+          limits: {},
+          commitmentDuration: null,
+          directOfficialUrl: 'https://www.netflix.com/fr/',
+          // STALE : consultable dans le comparateur, jamais comptée (A.6).
+          lastVerifiedAt: new Date('2026-01-15T00:00:00.000Z'),
+          nextCheckAt: new Date('2026-06-01T00:00:00.000Z'),
+        },
+      });
+
+      const dashboard = await build();
+
+      expect(dashboard.savings.potential.minorUnits).toBe('0');
+    });
+
     it('ignore une offre dont la vérification est périmée', async () => {
       for (const date of ['2025-12-05', '2026-01-05', '2026-02-05', '2026-03-05']) {
         await seedExpense({ userId: session.user.id, date, amount: '13.49' });

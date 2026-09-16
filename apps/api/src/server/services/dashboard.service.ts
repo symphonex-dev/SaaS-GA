@@ -21,6 +21,7 @@ import {
 } from '@subscription-manager/shared';
 import type { ComparisonOffer, Expense, UserSavingsGoal } from '@prisma/client';
 
+import { offerFreshness } from '@/lib/comparison/matching';
 import { resolveCurrency } from '@/lib/finance/currency';
 import { decimalToMoney, moneyToDto } from '@/lib/finance/money';
 import { nextExpectedDate } from '@/lib/finance/projections';
@@ -290,22 +291,26 @@ function priceAlerts(
 
 /**
  * Économies potentielles : comparaison de chaque abonnement actif aux offres
- * **encore vérifiées** de son pays, à devise et périodicité identiques.
+ * **fraîchement vérifiées** de son pays, à devise et périodicité identiques.
  *
  * Rapprochement volontairement strict (nom de service normalisé identique) :
  * le comparateur complet relève de `specs/comparateur-et-assistant-ia.md`.
- * Aucune offre périmée n'entre dans le calcul, et une alternative plus chère ne
- * produit jamais d'économie négative (§6).
+ * Seules les offres `FRESH` entrent dans le total : une offre vérifiée il y a
+ * plus de `COMPARISON_OFFER_MAX_AGE_DAYS` jours reste consultable dans le
+ * comparateur, mais n'entre dans aucun total (A.6) — c'est la règle même de
+ * `recommendable`. Une alternative plus chère ne produit jamais d'économie
+ * négative (§6).
  */
 function potentialSavings(
   series: readonly RecurringSeries[],
   offers: readonly ComparisonOffer[],
   currency: Currency,
+  now: Date,
 ): Money {
   const offersByKey = new Map<string, ComparisonOffer[]>();
 
   for (const offer of offers) {
-    if (offer.currency !== currency) {
+    if (offer.currency !== currency || offerFreshness(offer, now) !== 'FRESH') {
       continue;
     }
 
@@ -548,7 +553,7 @@ export const dashboardService = {
       upcomingExpenses: upcomingExpenses(series, currency),
       priceAlerts: priceAlerts(series, currency, entitlements.priceIncreaseAlerts),
       savings: {
-        potential: dtoOf(potentialSavings(series, offers, currency)),
+        potential: dtoOf(potentialSavings(series, offers, currency, now)),
         // Aucune table `Saving` n'existe au schéma : le montant confirmé est
         // celui que l'utilisateur a lui-même déclaré atteint sur ses objectifs.
         confirmed: dtoOf(confirmedFromGoals(goalInputs, currency)),

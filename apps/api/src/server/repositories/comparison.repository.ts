@@ -36,6 +36,26 @@ export interface AuditWriteData {
   after: Prisma.InputJsonValue | null;
 }
 
+/** Entrée d'audit calculée à partir de la ligne réellement écrite. */
+export type AuditFor = (offer: ComparisonOffer) => AuditWriteData;
+
+/**
+ * Colonnes d'une entrée d'audit.
+ *
+ * Un instantané absent est laissé de côté plutôt qu'écrit à `JsonNull` : la
+ * colonne reste alors un vrai NULL SQL, relu tel quel.
+ */
+function auditColumns(data: AuditWriteData): Prisma.ComparisonOfferAuditCreateInput {
+  return {
+    offerId: data.offerId,
+    action: data.action,
+    actorUserId: data.actorUserId,
+    actorEmail: data.actorEmail,
+    ...(data.before === null ? {} : { before: data.before }),
+    ...(data.after === null ? {} : { after: data.after }),
+  };
+}
+
 export const comparisonRepository = {
   /**
    * Offres candidates d'un pays.
@@ -65,38 +85,47 @@ export const comparisonRepository = {
     return prisma.comparisonOffer.findUnique({ where: { id } });
   },
 
-  async create(data: OfferWriteData): Promise<ComparisonOffer> {
-    return prisma.comparisonOffer.create({ data });
-  },
+  /*
+   * Écritures auditées (A.8).
+   *
+   * L'offre et sa trace sont écrites dans **une même transaction** : si la
+   * trace ne peut pas être écrite, la modification est annulée. Une offre ne
+   * peut donc jamais changer sans laisser de trace. Le journal est en ajout
+   * seul : aucune méthode ne modifie ni ne supprime une entrée d'audit.
+   */
 
-  async update(id: string, data: Partial<OfferWriteData>): Promise<ComparisonOffer> {
-    return prisma.comparisonOffer.update({
-      where: { id },
-      data: { ...data, updatedAt: new Date() },
+  async createAudited(data: OfferWriteData, auditFor: AuditFor): Promise<ComparisonOffer> {
+    return prisma.$transaction(async (tx) => {
+      const created = await tx.comparisonOffer.create({ data });
+
+      await tx.comparisonOfferAudit.create({ data: auditColumns(auditFor(created)) });
+
+      return created;
     });
   },
 
-  async delete(id: string): Promise<void> {
-    await prisma.comparisonOffer.delete({ where: { id } });
+  async updateAudited(
+    id: string,
+    data: Partial<OfferWriteData>,
+    auditFor: AuditFor,
+  ): Promise<ComparisonOffer> {
+    return prisma.$transaction(async (tx) => {
+      const updated = await tx.comparisonOffer.update({
+        where: { id },
+        data: { ...data, updatedAt: new Date() },
+      });
+
+      await tx.comparisonOfferAudit.create({ data: auditColumns(auditFor(updated)) });
+
+      return updated;
+    });
   },
 
-  /**
-   * Écrit une entrée d'audit (A.8).
-   *
-   * Jamais de mise à jour ni de suppression : le journal est en ajout seul.
-   */
-  async recordAudit(data: AuditWriteData): Promise<ComparisonOfferAudit> {
-    return prisma.comparisonOfferAudit.create({
-      // Un instantane absent est laisse de cote plutot qu'ecrit a `JsonNull` :
-      // la colonne reste alors un vrai NULL SQL, relu tel quel.
-      data: {
-        offerId: data.offerId,
-        action: data.action,
-        actorUserId: data.actorUserId,
-        actorEmail: data.actorEmail,
-        ...(data.before === null ? {} : { before: data.before }),
-        ...(data.after === null ? {} : { after: data.after }),
-      },
+  async deleteAudited(id: string, audit: AuditWriteData): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+      await tx.comparisonOffer.delete({ where: { id } });
+      // La trace survit à l'offre : elle conserve l'état « avant » complet.
+      await tx.comparisonOfferAudit.create({ data: auditColumns(audit) });
     });
   },
 

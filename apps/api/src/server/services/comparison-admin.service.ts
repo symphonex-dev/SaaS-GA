@@ -18,6 +18,7 @@ import { minorUnitsToDatabaseDecimal } from '@/lib/finance/money';
 import type { AdminActor } from '@/server/admin/admin-access';
 import {
   comparisonRepository,
+  type AuditWriteData,
   type OfferWriteData,
 } from '@/server/repositories/comparison.repository';
 import { toOfferDto } from '@/server/services/comparison.service';
@@ -26,14 +27,23 @@ import { toOfferDto } from '@/server/services/comparison.service';
  * Administration de la base d'offres
  * (`specs/comparateur-et-assistant-ia.md` A.8).
  *
- * Deux garanties tenues ici :
+ * Trois garanties tenues ici :
  *  - **aucun prix n'est inventé** : chaque écriture provient d'une saisie
  *    humaine validée par `comparisonOfferInputSchema`, jamais d'une IA ni
  *    d'une collecte automatique (A.1, CLAUDE.md §5.12) ;
  *  - **toute modification est auditée** : qui, quand, avant/après, dans une
  *    même transaction que l'écriture — une offre ne peut pas changer sans
- *    laisser de trace.
+ *    laisser de trace ;
+ *  - **aucune vérification n'est datée du futur** : la date de vérification
+ *    est l'instant où le prix a été constaté. Datée du futur, une offre
+ *    paraîtrait fraîche sans l'être (A.6).
  */
+
+/**
+ * Tolérance d'horloge entre le poste de l'administrateur et le serveur.
+ * Au-delà, une date de vérification postérieure à « maintenant » est refusée.
+ */
+const VERIFICATION_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
 /** Instantané servant d'état « avant » / « après » dans le journal. */
 function snapshot(offer: ComparisonOffer): Prisma.InputJsonValue {
@@ -97,6 +107,18 @@ function toInputShape(offer: ComparisonOffer): ComparisonOfferInput {
   };
 }
 
+/**
+ * Refuse une date de vérification future.
+ *
+ * Contrôle serveur, et non dans le schéma partagé : il dépend de l'horloge, et
+ * un schéma Zod doit rester une fonction pure de son entrée.
+ */
+function assertVerifiedInThePast(verifiedAt: string, now: Date, field: string): void {
+  if (Date.parse(verifiedAt) > now.getTime() + VERIFICATION_CLOCK_SKEW_MS) {
+    throw new AppError(ERROR_CODES.VALIDATION_ERROR, 'Date de vérification future.', field);
+  }
+}
+
 /** Revalide l'offre fusionnée ; une saisie incohérente est rejetée en bloc. */
 function mergeAndValidate(
   offer: ComparisonOffer,
@@ -128,26 +150,20 @@ function toAuditDto(audit: ComparisonOfferAudit): ComparisonOfferAuditDto {
 }
 
 /**
- * Ecrit la trace.
+ * Contenu de la trace.
  *
- * Les instantanes sont passes **deja calcules** : celui de l'etat « avant »
- * doit etre pris avant l'ecriture, sinon il refleterait l'etat « apres ».
+ * L'instantané « avant » est pris **avant** l'écriture, sinon il refléterait
+ * l'état « après ». L'instantané « après » est pris sur la ligne réellement
+ * écrite, dans la transaction (`comparisonRepository.*Audited`).
  */
-async function audit(
+function auditEntry(
   actor: AdminActor,
   action: OfferAuditAction,
   offerId: string,
   before: Prisma.InputJsonValue | null,
   after: Prisma.InputJsonValue | null,
-): Promise<void> {
-  await comparisonRepository.recordAudit({
-    offerId,
-    action,
-    actorUserId: actor.userId,
-    actorEmail: actor.email,
-    before,
-    after,
-  });
+): AuditWriteData {
+  return { offerId, action, actorUserId: actor.userId, actorEmail: actor.email, before, after };
 }
 
 export const comparisonAdminService = {
@@ -160,11 +176,17 @@ export const comparisonAdminService = {
     return { offers: offers.map((offer) => toOfferDto(offer)) };
   },
 
-  async create(actor: AdminActor, input: ComparisonOfferInput): Promise<ComparisonOfferDto> {
-    const created = await comparisonRepository.create(toWriteData(input));
+  async create(
+    actor: AdminActor,
+    input: ComparisonOfferInput,
+    now: Date = new Date(),
+  ): Promise<ComparisonOfferDto> {
+    assertVerifiedInThePast(input.lastVerifiedAt, now, 'lastVerifiedAt');
 
     // Pas d'état « avant » à la création : le journal le laisse à `null`.
-    await audit(actor, 'CREATE', created.id, null, snapshot(created));
+    const created = await comparisonRepository.createAudited(toWriteData(input), (offer) =>
+      auditEntry(actor, 'CREATE', offer.id, null, snapshot(offer)),
+    );
 
     return toOfferDto(created);
   },
@@ -173,6 +195,7 @@ export const comparisonAdminService = {
     actor: AdminActor,
     id: string,
     patch: ComparisonOfferPatch,
+    now: Date = new Date(),
   ): Promise<ComparisonOfferDto> {
     const before = await comparisonRepository.findById(id);
 
@@ -181,10 +204,15 @@ export const comparisonAdminService = {
     }
 
     const merged = mergeAndValidate(before, patch);
-    const beforeSnapshot = snapshot(before);
-    const after = await comparisonRepository.update(id, toWriteData(merged));
 
-    await audit(actor, 'UPDATE', id, beforeSnapshot, snapshot(after));
+    if (patch.lastVerifiedAt !== undefined) {
+      assertVerifiedInThePast(patch.lastVerifiedAt, now, 'lastVerifiedAt');
+    }
+
+    const beforeSnapshot = snapshot(before);
+    const after = await comparisonRepository.updateAudited(id, toWriteData(merged), (offer) =>
+      auditEntry(actor, 'UPDATE', id, beforeSnapshot, snapshot(offer)),
+    );
 
     return toOfferDto(after);
   },
@@ -196,12 +224,11 @@ export const comparisonAdminService = {
       throw offerNotFound();
     }
 
-    const beforeSnapshot = snapshot(before);
-
-    await comparisonRepository.delete(id);
-    // L'audit survit à l'offre : la trace est écrite après la suppression et
-    // conserve l'état « avant » complet.
-    await audit(actor, 'DELETE', id, beforeSnapshot, null);
+    // L'audit survit à l'offre et conserve l'état « avant » complet.
+    await comparisonRepository.deleteAudited(
+      id,
+      auditEntry(actor, 'DELETE', id, snapshot(before), null),
+    );
 
     return { deleted: true };
   },
@@ -217,12 +244,15 @@ export const comparisonAdminService = {
     actor: AdminActor,
     id: string,
     input: ComparisonOfferVerifyInput,
+    now: Date = new Date(),
   ): Promise<ComparisonOfferDto> {
     const before = await comparisonRepository.findById(id);
 
     if (before === null) {
       throw offerNotFound();
     }
+
+    assertVerifiedInThePast(input.verifiedAt, now, 'verifiedAt');
 
     const currency = resolveCurrency(before.currency);
     const price =
@@ -242,9 +272,9 @@ export const comparisonAdminService = {
     });
 
     const beforeSnapshot = snapshot(before);
-    const after = await comparisonRepository.update(id, toWriteData(merged));
-
-    await audit(actor, 'VERIFY', id, beforeSnapshot, snapshot(after));
+    const after = await comparisonRepository.updateAudited(id, toWriteData(merged), (offer) =>
+      auditEntry(actor, 'VERIFY', id, beforeSnapshot, snapshot(offer)),
+    );
 
     return toOfferDto(after);
   },

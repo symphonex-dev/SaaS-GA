@@ -141,6 +141,64 @@ Sans lui, une demande de « mot de passe oublié » reste **définitivement sans
 
 ---
 
+## 7 bis. Base d'offres de comparaison (production)
+
+Le seed (`npm run db:seed`) ne contient que des offres **de démonstration**, refusées en production, et dont la prochaine vérification est déjà dépassée : elles n'apparaîtraient de toute façon nulle part. La base de production est alimentée **à la main, offre par offre**, par les routes d'administration (`specs/comparateur-et-assistant-ia.md` A.8). Aucune offre n'est collectée ni générée automatiquement.
+
+### Accès administrateur
+
+1. Créer le compte administrateur depuis l'application (inscription normale).
+2. Sur Vercel, renseigner `ADMIN_EMAILS` avec son adresse (plusieurs adresses : séparées par des virgules), puis redéployer. Vide, **personne** n'est administrateur.
+3. Obtenir un jeton de session : `POST /api/auth/login` avec `{ "email", "password" }` ; le jeton est dans `data.token`. Il se transmet en `Authorization: Bearer <jeton>` et ne doit jamais être collé dans un ticket ou un dépôt.
+
+### Saisir une offre réellement vérifiée
+
+`POST /api/admin/comparison-offers`, corps JSON :
+
+```json
+{
+  "serviceName": "Netflix",
+  "country": "FR",
+  "price": { "minorUnits": "<prix constaté, en centimes>", "currency": "EUR" },
+  "billingCycle": "MONTHLY",
+  "featuresIncluded": ["<formule et fonctionnalités, telles qu'affichées>"],
+  "limits": {},
+  "commitmentDuration": null,
+  "directOfficialUrl": "https://<page tarifaire officielle du pays>",
+  "lastVerifiedAt": "<instant où le prix a été constaté, ISO 8601>",
+  "nextCheckAt": "<lastVerifiedAt + 30 jours au plus>",
+  "affiliateNote": null,
+  "affiliateUrl": null
+}
+```
+
+Règles, toutes vérifiées par le serveur sauf mention contraire :
+
+- **Prix constaté sur la page officielle du pays et dans sa devise**, relevé par une personne. Jamais un prix estimé, converti ou généré. *(Non vérifiable par le serveur : c'est la responsabilité de l'administrateur.)*
+- **`serviceName` = nom du commerçant tel que l'application le normalise**, par exemple « Netflix », « Spotify », « Disney+ », « Amazon Prime », « YouTube Premium », « Google One », « iCloud », « Microsoft 365 », « Deezer », « Canal+ » (alias de `MERCHANT_ALIAS_RULES`, `apps/api/src/lib/merchant/normalize.ts`) ; pour un autre commerçant, le nom affiché dans la liste des abonnements de l'application. Casse, accents et ponctuation sont ignorés. Un nom plus long (« Netflix Standard ») ne donne qu'une correspondance *suggérée* : l'offre est affichée, mais **jamais recommandée ni comptée** dans les économies. Le nom de la formule va dans `featuresIncluded`, affiché tel quel (non traduit).
+- **Pays et devise cohérents avec les utilisateurs visés** : une offre n'est proposée qu'à un utilisateur de **même pays et même devise**.
+- **`lastVerifiedAt` ne peut pas être dans le futur** (tolérance de 5 minutes), et `nextCheckAt` doit lui être postérieur.
+- **`directOfficialUrl` en HTTPS**, obligatoire. Un `affiliateUrl` exige son `affiliateNote` (mention de commission affichée à côté du lien).
+- Chaque création, modification, revérification et suppression est journalisée (qui, quand, avant/après) dans la même transaction que l'écriture : `GET /api/admin/comparison-offers/<id>`.
+
+### Cycle de fraîcheur
+
+| Âge de la vérification | État | Effet dans l'application |
+|---|---|---|
+| ≤ 30 jours, avant `nextCheckAt` | `FRESH` | affichée ; recommandée et comptée si l'économie est positive |
+| > 30 jours, avant `nextCheckAt` | `STALE` | affichée « obsolète », jamais recommandée ni comptée |
+| après `nextCheckAt` | `EXPIRED` | n'apparaît plus nulle part |
+
+Avec `nextCheckAt` = `lastVerifiedAt` + 30 jours, une offre passe directement de `FRESH` à `EXPIRED`. Une échéance plus lointaine la laisse visible comme obsolète.
+
+**Revérification** (au plus tous les 30 jours) : `POST /api/admin/comparison-offers/<id>/verify` avec `{ "verifiedAt", "nextCheckAt" }`, plus `"price"` si le prix a changé (même devise obligatoire). C'est le seul moyen de rendre une offre à nouveau `FRESH`. Pour repérer les offres à revoir : `GET /api/admin/comparison-offers?country=FR` renvoie toutes les offres, périmées comprises, avec leurs dates. Une offre abandonnée se retire par `DELETE /api/admin/comparison-offers/<id>` (la trace est conservée).
+
+### Aucun job à planifier pour les offres
+
+Le rapprochement est **recalculé à chaque lecture** (`GET /api/comparisons`, `GET /api/comparisons/<expenseId>`, `GET /api/dashboard`), avec l'heure courante : une offre revérifiée réapparaît et une offre échue disparaît sans aucune tâche planifiée. `POST /api/comparisons/<expenseId>/refresh` fait exactement le même calcul à la demande de l'utilisateur ; il ne collecte aucun prix. Le seul job d'exploitation de l'API reste `POST /api/billing/expire-overdue` (facturation, sans rapport avec les offres).
+
+---
+
 ## 8. Vérifications manuelles avant publication
 
 - [ ] Les URLs de politique de confidentialité et CGU sont publiques et accessibles sans connexion.

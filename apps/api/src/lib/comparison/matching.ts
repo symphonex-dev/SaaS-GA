@@ -46,7 +46,10 @@ export interface MatchingContext {
  * vérification est dépassée sort du matching, elle n'est même plus consultable
  * comme alternative.
  */
-export function offerFreshness(offer: ComparableOffer, now: Date): OfferFreshness {
+export function offerFreshness(
+  offer: Pick<ComparableOffer, 'lastVerifiedAt' | 'nextCheckAt'>,
+  now: Date,
+): OfferFreshness {
   if (offer.nextCheckAt.getTime() < now.getTime()) {
     return 'EXPIRED';
   }

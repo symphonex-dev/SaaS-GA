@@ -3,7 +3,7 @@ import type {
   ComparisonOfferAuditDto,
   ComparisonOfferDto,
 } from '@subscription-manager/shared';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   DELETE as deleteRoute,
@@ -12,6 +12,7 @@ import {
 } from '@/app/api/admin/comparison-offers/[id]/route';
 import { POST as verifyRoute } from '@/app/api/admin/comparison-offers/[id]/verify/route';
 import { GET as listRoute, POST as createRoute } from '@/app/api/admin/comparison-offers/route';
+import { prisma } from '@/lib/db/prisma';
 import { resetServerEnvCache } from '@/lib/env/server';
 import { resetRateLimits } from '@/lib/security/rate-limit';
 
@@ -315,5 +316,93 @@ describe('administration des offres de comparaison', () => {
     );
 
     expect(offers.map((offer) => offer.serviceName)).toEqual(['Netflix US']);
+  });
+
+  it('refuse une offre dont la date de vérification est dans le futur', async () => {
+    const response = await createRoute(
+      apiRequest('/api/admin/comparison-offers', {
+        method: 'POST',
+        token: admin.token,
+        body: {
+          ...VALID_OFFER,
+          // Datée du futur, l'offre paraîtrait fraîche sans avoir été vérifiée.
+          lastVerifiedAt: '2099-01-01T00:00:00.000Z',
+          nextCheckAt: '2099-02-01T00:00:00.000Z',
+        },
+      }),
+    );
+
+    expect(await expectErrorCode(response)).toBe('VALIDATION_ERROR');
+    expect(tables.comparisonOffer.rows).toHaveLength(0);
+    expect(tables.comparisonOfferAudit.rows).toHaveLength(0);
+  });
+
+  it('refuse une revérification ou une correction datée du futur', async () => {
+    const offer = await createOffer();
+
+    const verify = await verifyRoute(
+      apiRequest(`/api/admin/comparison-offers/${offer.id}/verify`, {
+        method: 'POST',
+        token: admin.token,
+        body: { verifiedAt: '2099-01-01T00:00:00.000Z', nextCheckAt: '2099-02-01T00:00:00.000Z' },
+      }),
+      context(offer.id),
+    );
+    const patch = await patchRoute(
+      apiRequest(`/api/admin/comparison-offers/${offer.id}`, {
+        method: 'PATCH',
+        token: admin.token,
+        body: {
+          lastVerifiedAt: '2099-01-01T00:00:00.000Z',
+          nextCheckAt: '2099-02-01T00:00:00.000Z',
+        },
+      }),
+      context(offer.id),
+    );
+
+    expect(await expectErrorCode(verify)).toBe('VALIDATION_ERROR');
+    expect(await expectErrorCode(patch)).toBe('VALIDATION_ERROR');
+    expect(tables.comparisonOfferAudit.rows).toHaveLength(1);
+  });
+
+  it('écrit chaque modification et sa trace dans une même transaction', async () => {
+    const transaction = vi.spyOn(prisma, '$transaction');
+
+    try {
+      const offer = await createOffer();
+
+      expect(transaction).toHaveBeenCalledTimes(1);
+
+      await patchRoute(
+        apiRequest(`/api/admin/comparison-offers/${offer.id}`, {
+          method: 'PATCH',
+          token: admin.token,
+          body: { serviceName: 'Netflix Standard' },
+        }),
+        context(offer.id),
+      );
+      await verifyRoute(
+        apiRequest(`/api/admin/comparison-offers/${offer.id}/verify`, {
+          method: 'POST',
+          token: admin.token,
+          body: { verifiedAt: '2026-06-20T00:00:00.000Z', nextCheckAt: '2026-07-20T00:00:00.000Z' },
+        }),
+        context(offer.id),
+      );
+      await deleteRoute(
+        apiRequest(`/api/admin/comparison-offers/${offer.id}`, {
+          method: 'DELETE',
+          token: admin.token,
+        }),
+        context(offer.id),
+      );
+
+      expect(transaction).toHaveBeenCalledTimes(4);
+      expect(
+        (tables.comparisonOfferAudit.rows as Array<{ action: string }>).map((row) => row.action),
+      ).toEqual(['CREATE', 'UPDATE', 'VERIFY', 'DELETE']);
+    } finally {
+      transaction.mockRestore();
+    }
   });
 });
