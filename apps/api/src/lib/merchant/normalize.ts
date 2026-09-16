@@ -28,7 +28,7 @@ export interface MerchantAliasRule {
 export const MERCHANT_ALIAS_RULES: MerchantAliasRule[] = [
   { pattern: /^netflix(?:\.com)?(?:\s+.*)?$/i, normalized: 'Netflix' },
   { pattern: /^spotify(?:\s+ab)?(?:\s+.*)?$/i, normalized: 'Spotify' },
-  { pattern: /^(?:disney\s*\+|disneyplus)(?:\s+.*)?$/i, normalized: 'Disney+' },
+  { pattern: /^(?:disney\s*\+|disney\s*plus)(?:\s+.*)?$/i, normalized: 'Disney+' },
   { pattern: /^amazon\s+prime(?:\s+.*)?$/i, normalized: 'Amazon Prime' },
   { pattern: /^(?:google\s+)?youtube\s*premium(?:\s+.*)?$/i, normalized: 'YouTube Premium' },
   { pattern: /^google\s+one(?:\s+.*)?$/i, normalized: 'Google One' },
